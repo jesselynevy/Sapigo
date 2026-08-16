@@ -33,7 +33,7 @@ SessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
-# Models inherits from this
+# model inherits from this
 class Base(DeclarativeBase):
     pass
 
