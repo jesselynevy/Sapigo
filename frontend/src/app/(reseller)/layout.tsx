@@ -5,7 +5,7 @@ export default function ResellerLayout({
 }) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="container mx-auto py-6">{children}</main>
+      <main className="container mx-auto ">{children}</main>
     </div>
   );
 }

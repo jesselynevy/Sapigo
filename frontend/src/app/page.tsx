@@ -8,30 +8,27 @@ export default function Home() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen ">
-      <div className="container mx-auto flex flex-col justify-between items-center">
-        <h1 className="text-2xl font-bold text-black">SapiGo</h1>
-        <div className="flex flex-col gap-4 w-full">
-          <Button
-            variant="primary"
-            onClick={() => {
-              router.push("/login");
-            }}
-            className="w-full"
-          >
-            Masuk
-          </Button>
+    <div className="min-h-screen  ">
+      <div className="container mx-auto flex bg-white py-8 px-4 gap-4  absolute bottom-0 self-end flex-col  rounded-t-[40px] items-center h-[35vh] ">
+        <Button
+          variant="primary"
+          onClick={() => {
+            router.push("/login");
+          }}
+          className="w-full"
+        >
+          Masuk
+        </Button>
 
-          <Button
-            variant="secondary"
-            onClick={() => {
-              router.push("/register");
-            }}
-            className="w-full"
-          >
-            Daftar
-          </Button>
-        </div>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            router.push("/register");
+          }}
+          className="w-full"
+        >
+          Daftar
+        </Button>
       </div>
     </div>
   );

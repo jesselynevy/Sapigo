@@ -1,6 +1,6 @@
 "use client";
 
-import Card from "@/components/ui/Card";
+import Card from "../ui/Card";
 import SapiStatusBadge from "./SapiStatusBadge";
 
 interface Sapi {
@@ -21,7 +21,7 @@ export default function SapiCard({ sapi, onClick }: SapiCardProps) {
   return (
     <Card
       className="cursor-pointer hover:shadow-lg transition-shadow"
-      onClick={onClick}
+      // onClick={onClick}
     >
       <div className="flex justify-between items-start mb-4">
         <div>
