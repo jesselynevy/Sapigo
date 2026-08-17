@@ -109,7 +109,7 @@ export default function DaftarSapiStepPage() {
       totalSteps={TOTAL_STEPS}
       currentStep={step}
       onBack={handleBack}
-      showProgress={step <= 4}
+      showProgress={step <= 5}
       showPrimaryButton={step < 5}
       primaryDisabled={!canProceed() || loading}
       onPrimaryClick={handleNext}

@@ -7,11 +7,11 @@ interface StatusBadgeProps {
 export default function StatusBadge({ status }: StatusBadgeProps) {
   const statusConfig = {
     verified: {
-      label: "Terverifikasi",
+      label: "Verified",
       className: "bg-green-100 text-green-700",
     },
     unverified: {
-      label: "Menunggu foto",
+      label: "Pending Verification",
       className: "bg-orange-100 text-orange-700",
     },
   }[status];
