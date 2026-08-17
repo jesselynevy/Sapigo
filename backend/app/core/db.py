@@ -1,6 +1,6 @@
 # Minimal Db Session Engine For DI
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -33,9 +33,11 @@ SessionLocal = sessionmaker(
     expire_on_commit=False,
 )
 
+
 # model inherits from this
 class Base(DeclarativeBase):
     pass
+
 
 # FastAPI DI Later, use with Depends(get_db)
 def get_db() -> Generator[Session, None, None]:
@@ -44,6 +46,7 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
 
 # for scripts/background jobs, not request handlers
 # commits on success, rolls back on error

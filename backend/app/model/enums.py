@@ -1,5 +1,6 @@
 import enum
 
+
 class AnimalStatus(str, enum.Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
