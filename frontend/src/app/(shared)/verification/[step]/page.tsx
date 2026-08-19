@@ -1,18 +1,18 @@
 "use client";
 
-import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { RotateCw, CheckCircle2 } from "lucide-react";
-import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
-import PhotoInput from "@/src/components/ui/PhotoInput";
 import InfoRow from "@/src/components/ui/InfoRow";
+import PhotoInput from "@/src/components/ui/PhotoInput";
 import StatusBadge from "@/src/components/ui/StatusBadge";
+import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
 import { useDaftarSapiState } from "@/src/lib/hooks/useDaftarSapiState";
-import router from "next/router";
+import { RotateCw, CheckCircle2 } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const TOTAL_STEPS = 4;
 
-export default function DaftarSapiStepPage() {
+export default function VerificationSapi() {
   const router = useRouter();
   const params = useParams<{ step: string }>();
   const step = Number(params.step);
@@ -34,7 +34,7 @@ export default function DaftarSapiStepPage() {
   useEffect(() => {
     if (!hydrated) return;
     if (isNaN(step) || step < 1 || step > TOTAL_STEPS) {
-      router.replace("/daftar-sapi/1");
+      router.replace("/verification/1");
     }
   }, [step, hydrated, router]);
 
@@ -68,7 +68,7 @@ export default function DaftarSapiStepPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  const goToStep = (s: number) => router.push(`/daftar-sapi/${s}`);
+  const goToStep = (s: number) => router.push(`/verification/${s}`);
 
   const handleBack = () => {
     router.push("/home");
@@ -97,10 +97,9 @@ export default function DaftarSapiStepPage() {
 
   // hindari render sebelum hydration selesai (avoid flash/mismatch)
   if (!hydrated) return null;
-
   return (
     <StepFlowLayout
-      title="Register a Cow"
+      title="Cow Verification"
       totalSteps={TOTAL_STEPS}
       currentStep={step}
       onBack={handleBack}
@@ -165,7 +164,7 @@ export default function DaftarSapiStepPage() {
         <>
           <div className="flex flex-col gap-1">
             <h2 className="font-jakarta font-bold text-black text-center">
-              Biometric Identity of Cow Creation
+              Biometric Identity of Cow Verification
             </h2>
             <h3 className="font-jakarta text-gray-500 text-center">
               Please point your camera towards the muzzle of the cow.
@@ -191,18 +190,17 @@ export default function DaftarSapiStepPage() {
             <>
               <CheckCircle2 className="w-16 h-16 text-green-700" />
               <p className="text-center font-bold text-black px-8">
-                Identity of Cow {cowData.cowCode.split("-")[0]} has been
-                successfully saved!
+                Cow {cowData.cowCode.split("-")[0]}'s Identity is successfully
+                verified!
               </p>
               <p className="text-center text-sm text-gray-500 px-8">
-                Please have the verification done after the physical cow is
-                transferred!
+                Output of verification here?
               </p>
             </>
           ) : (
             <>
               <p className="text-center font-bold text-black px-8">
-                Cow Data isn't saved successfully
+                Cow Data isn't loaded successfully
               </p>
             </>
           )}
