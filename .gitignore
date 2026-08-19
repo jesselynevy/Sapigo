@@ -1,6 +1,10 @@
 #  --- Backend ---
 .env
+<<<<<<< HEAD
 backend/.env
+=======
+backend/.ruff_cache/
+>>>>>>> refs/rewritten/main
 
 # Python-generated files
 __pycache__/
@@ -12,6 +16,7 @@ wheels/
 
 # Virtual environments
 .venv
+<<<<<<< HEAD
 
 # dependencies
 /node_modules
@@ -49,3 +54,5 @@ yarn-error.log*
 next-env.d.ts
 
 frontend/.env
+=======
+>>>>>>> refs/rewritten/main
