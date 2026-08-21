@@ -2,16 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fileToBase64, base64ToFile } from "@/src/lib/utils/fileConversion";
+import { CowData } from "@/src/types/sapi";
 
 const STORAGE_KEY = "daftar-sapi-state";
-
-interface CowData {
-  cowCode: string;
-  ownership: string;
-  weight: number;
-  breed: string;
-  verification: "verified" | "unverified";
-}
 
 interface StoredState {
   qrPhotoBase64: string | null;

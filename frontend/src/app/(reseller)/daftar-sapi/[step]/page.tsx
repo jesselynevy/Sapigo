@@ -8,7 +8,7 @@ import PhotoInput from "@/src/components/ui/PhotoInput";
 import InfoRow from "@/src/components/ui/InfoRow";
 import StatusBadge from "@/src/components/ui/StatusBadge";
 import { useDaftarSapiState } from "@/src/lib/hooks/useDaftarSapiState";
-import router from "next/router";
+import { decodeQrAndFetch } from "@/src/lib/utils/decodeQrAndFetch";
 
 const TOTAL_STEPS = 4;
 
@@ -16,6 +16,7 @@ export default function DaftarSapiStepPage() {
   const router = useRouter();
   const params = useParams<{ step: string }>();
   const step = Number(params.step);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     qrPhoto,
@@ -29,6 +30,7 @@ export default function DaftarSapiStepPage() {
   } = useDaftarSapiState();
 
   const [loading, setLoading] = useState(false);
+  const goToStep = (s: number) => router.push(`/daftar-sapi/${s}`);
 
   // redirect kalau step di URL tidak valid
   useEffect(() => {
@@ -38,19 +40,11 @@ export default function DaftarSapiStepPage() {
     }
   }, [step, hydrated, router]);
 
-  // simulasi lookup data sapi begitu masuk step 2 (kalau belum ada cowData)
   useEffect(() => {
-    if (step === 2 && !cowData) {
-      // TODO: ganti dengan API call sesungguhnya berdasarkan qrPhoto
-      setCowData({
-        cowCode: "X-ASJAAJAJA-AJAJAJAJJA",
-        ownership: "Farmer ABC",
-        weight: 3,
-        breed: "Limousine",
-        verification: "unverified",
-      });
+    if (step === 1 && qrPhoto && !cowData) {
+      decodeQrAndFetch(qrPhoto, setError, setCowData, goToStep, 2);
     }
-  }, [step, cowData, setCowData]);
+  }, [step, cowData, qrPhoto, setCowData, goToStep]);
 
   // auto-run submit saat masuk step 4 (loading) -> lanjut ke step 5
   useEffect(() => {
@@ -68,10 +62,12 @@ export default function DaftarSapiStepPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  const goToStep = (s: number) => router.push(`/daftar-sapi/${s}`);
-
   const handleBack = () => {
     router.push("/home");
+  };
+
+  const handleStepBack = () => {
+    router.push(`/daftar-sapi/${step - 1}`);
   };
 
   const handleRescan = () => goToStep(1);
@@ -95,6 +91,10 @@ export default function DaftarSapiStepPage() {
     return true;
   };
 
+  useEffect(() => {
+    console.log(error);
+  }, [error]);
+
   // hindari render sebelum hydration selesai (avoid flash/mismatch)
   if (!hydrated) return null;
 
@@ -110,7 +110,7 @@ export default function DaftarSapiStepPage() {
       onPrimaryClick={handleNext}
       showSecondaryButton={step !== 1}
       secondaryLabel="Kembali"
-      onSecondaryClick={step === 5 ? handleFinish : handleBack}
+      onSecondaryClick={step === 5 ? handleFinish : handleStepBack}
     >
       {step === 1 && (
         <>
@@ -122,7 +122,11 @@ export default function DaftarSapiStepPage() {
               Please point your camera to the QR Code of the ear tags
             </h3>
           </div>
-          <PhotoInput value={qrPhoto} onChange={setQrPhoto} />
+          <PhotoInput
+            value={qrPhoto}
+            onChange={setQrPhoto}
+            placeholder="Take a picture of your cows' QR ear tags"
+          />
         </>
       )}
 
@@ -150,13 +154,16 @@ export default function DaftarSapiStepPage() {
                 </button>
               }
             />
-            <InfoRow label="Ownership" value={cowData.ownership} />
-            <InfoRow label="Weight" value={`${cowData.weight} kg`} />
+            <InfoRow label="Cow Name" value={`${cowData.display_name}`} />
             <InfoRow label="Breed" value={cowData.breed} />
-            <InfoRow
-              label="Verification"
-              value={<StatusBadge status={cowData.verification} />}
-            />
+            <InfoRow label="Sex" value={cowData.sex} />
+            <InfoRow label="Status" value={cowData.status} />
+            {/* <InfoRow
+              label="Status"
+              value={<StatusBadge status={cowData.status} />}
+            /> */}
+
+            {error && <p className="text-red-400 text-xl">{error}</p>}
           </div>
         </>
       )}

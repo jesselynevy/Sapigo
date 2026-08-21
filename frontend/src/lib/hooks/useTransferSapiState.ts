@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { fileToBase64, base64ToFile } from "@/src/lib/utils/fileConversion";
+import { CowData } from "@/src/types/sapi";
 
 const STORAGE_KEY = "transfer-sapi-state";
 
@@ -10,21 +11,12 @@ interface CowOption {
   cowCode: string;
   info: string;
 }
-
-interface TransferInfo {
-  cowCode: string;
-  ownership: string;
-  weight: number;
-  breed: string;
-  verification: "verified" | "unverified";
-}
-
 interface StoredState {
   receiverPhone: string;
   selectedCowId: string | null;
   qrPhotoBase64: string | null;
   identityPhotoBase64: string | null;
-  transferInfo: TransferInfo | null;
+  transferInfo: CowData | null;
 }
 
 const EMPTY_STATE: StoredState = {
@@ -54,9 +46,7 @@ export function useTransferSapiState() {
   const [selectedCowId, setSelectedCowIdState] = useState<string | null>(null);
   const [qrPhoto, setQrPhotoState] = useState<File | null>(null);
   const [identityPhoto, setIdentityPhotoState] = useState<File | null>(null);
-  const [transferInfo, setTransferInfoState] = useState<TransferInfo | null>(
-    null,
-  );
+  const [transferInfo, setTransferInfoState] = useState<CowData | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -101,7 +91,7 @@ export function useTransferSapiState() {
     });
   }, []);
 
-  const setTransferInfo = useCallback((data: TransferInfo | null) => {
+  const setTransferInfo = useCallback((data: CowData | null) => {
     setTransferInfoState(data);
     writeStorage({ ...readStorage(), transferInfo: data });
   }, []);
@@ -131,4 +121,4 @@ export function useTransferSapiState() {
   };
 }
 
-export type { CowOption, TransferInfo };
+export type { CowOption, CowData };

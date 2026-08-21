@@ -5,6 +5,7 @@ import PhotoInput from "@/src/components/ui/PhotoInput";
 import StatusBadge from "@/src/components/ui/StatusBadge";
 import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
 import { useDaftarSapiState } from "@/src/lib/hooks/useDaftarSapiState";
+import { decodeQrAndFetch } from "@/src/lib/utils/decodeQrAndFetch";
 import { RotateCw, CheckCircle2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export default function VerificationSapi() {
   const router = useRouter();
   const params = useParams<{ step: string }>();
   const step = Number(params.step);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     qrPhoto,
@@ -39,18 +41,18 @@ export default function VerificationSapi() {
   }, [step, hydrated, router]);
 
   // simulasi lookup data sapi begitu masuk step 2 (kalau belum ada cowData)
-  useEffect(() => {
-    if (step === 2 && !cowData) {
-      // TODO: ganti dengan API call sesungguhnya berdasarkan qrPhoto
-      setCowData({
-        cowCode: "X-ASJAAJAJA-AJAJAJAJJA",
-        ownership: "Farmer ABC",
-        weight: 3,
-        breed: "Limousine",
-        verification: "unverified",
-      });
-    }
-  }, [step, cowData, setCowData]);
+  // useEffect(() => {
+  //   if (step === 2 && !cowData) {
+  //     // TODO: ganti dengan API call sesungguhnya berdasarkan qrPhoto
+  //     setCowData({
+  //       cowCode: "X-ASJAAJAJA-AJAJAJAJJA",
+  //       ownership: "Farmer ABC",
+  //       weight: 3,
+  //       breed: "Limousine",
+  //       verification: "unverified",
+  //     });
+  //   }
+  // }, [step, cowData, setCowData]);
 
   // auto-run submit saat masuk step 4 (loading) -> lanjut ke step 5
   useEffect(() => {
@@ -94,6 +96,12 @@ export default function VerificationSapi() {
     if (step === 3) return !!muzzlePhoto;
     return true;
   };
+
+  useEffect(() => {
+    if (step === 1 && qrPhoto && !cowData) {
+      decodeQrAndFetch(qrPhoto, setError, setCowData, goToStep, 2);
+    }
+  }, [step, cowData, qrPhoto, setCowData, goToStep]);
 
   // hindari render sebelum hydration selesai (avoid flash/mismatch)
   if (!hydrated) return null;
@@ -149,13 +157,11 @@ export default function VerificationSapi() {
                 </button>
               }
             />
-            <InfoRow label="Ownership" value={cowData.ownership} />
-            <InfoRow label="Weight" value={`${cowData.weight} kg`} />
+            <InfoRow label="Cow Name" value={`${cowData.display_name}`} />
             <InfoRow label="Breed" value={cowData.breed} />
-            <InfoRow
-              label="Verification"
-              value={<StatusBadge status={cowData.verification} />}
-            />
+            <InfoRow label="Sex" value={cowData.sex} />
+            <InfoRow label="Status" value={cowData.status} />
+            {error && <p className="text-red-400 text-xl">{error}</p>}
           </div>
         </>
       )}

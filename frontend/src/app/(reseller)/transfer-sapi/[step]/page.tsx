@@ -13,6 +13,7 @@ import {
   useTransferSapiState,
   CowOption,
 } from "@/src/lib/hooks/useTransferSapiState";
+import { decodeQrAndFetch } from "@/src/lib/utils/decodeQrAndFetch";
 
 const TOTAL_STEPS = 6;
 
@@ -31,6 +32,7 @@ export default function TransferSapiStepPage() {
   const router = useRouter();
   const params = useParams<{ step: string }>();
   const step = Number(params.step);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     receiverPhone,
@@ -63,18 +65,18 @@ export default function TransferSapiStepPage() {
   }, [step, hydrated, router]);
 
   // simulasi lookup info transfer begitu masuk step 3
-  useEffect(() => {
-    if (step === 3 && !transferInfo) {
-      // TODO: ganti dengan API call berdasarkan qrPhoto/selectedCowId
-      setTransferInfo({
-        cowCode: "X-ASJAAJAJA-AJAJAJAJJA",
-        ownership: "Farmer ABC",
-        weight: 3,
-        breed: "Limousine",
-        verification: "verified",
-      });
-    }
-  }, [step, transferInfo, setTransferInfo]);
+  // useEffect(() => {
+  //   if (step === 2 && !transferInfo) {
+  //     // TODO: ganti dengan API call berdasarkan qrPhoto/selectedCowId
+  //     setTransferInfo({
+  //       cowCode: "X-ASJAAJAJA-AJAJAJAJJA",
+  //       breed: "Limousine",
+  //       display_name: "",
+  //       status: "",
+  //       sex: "",
+  //     });
+  //   }
+  // }, [step, transferInfo, setTransferInfo]);
 
   // step 5: proses verifikasi -> lanjut ke step 6
   useEffect(() => {
@@ -115,12 +117,18 @@ export default function TransferSapiStepPage() {
   };
 
   const canProceed = () => {
-    if (step === 1) return !!receiverPhone && !!selectedCowId;
+    if (step === 1) return !!receiverPhone;
     if (step === 2) return !!qrPhoto;
     if (step === 4) return !!identityPhoto;
     if (step === 5) return !loading;
     return true;
   };
+
+  useEffect(() => {
+    if (step === 2 && qrPhoto && !transferInfo) {
+      decodeQrAndFetch(qrPhoto, setError, setTransferInfo, goToStep, 2);
+    }
+  }, [step, transferInfo, qrPhoto, setTransferInfo, goToStep]);
 
   if (!hydrated) return null;
 
@@ -150,7 +158,8 @@ export default function TransferSapiStepPage() {
             onChange={(e) => setReceiverPhone(e.target.value)}
           />
 
-          <div className="flex flex-col gap-2">
+          {/* Commented due to uncertainty in implementing the selection of cows manually*/}
+          {/* <div className="flex flex-col gap-2">
             <p className="font-bold  text-gray-700">
               Pilih sapi yang ingin ditransfer
             </p>
@@ -177,7 +186,7 @@ export default function TransferSapiStepPage() {
                 Sapi tidak ditemukan.
               </p>
             )}
-          </div>
+          </div> */}
         </>
       )}
 
@@ -195,7 +204,7 @@ export default function TransferSapiStepPage() {
           <PhotoInput
             value={qrPhoto}
             onChange={setQrPhoto}
-            placeholder="Foto QR Code pada sapi"
+            placeholder="Take a picture of your cows' QR ear tags"
           />
         </>
       )}
@@ -213,13 +222,9 @@ export default function TransferSapiStepPage() {
           </div>
           <div className="border border-[#D6DCE8] rounded-xl px-4 py-2 divide-y divide-[#EEF1F6]">
             <InfoRow label="Cow Code" value={transferInfo.cowCode} />
-            <InfoRow label="Ownership" value={transferInfo.ownership} />
-            <InfoRow label="Weight" value={`${transferInfo.weight} kg`} />
             <InfoRow label="Breed" value={transferInfo.breed} />
-            <InfoRow
-              label="Verification"
-              value={<StatusBadge status={transferInfo.verification} />}
-            />
+            <InfoRow label="Sex" value={transferInfo.sex} />
+            <InfoRow label="Status" value={transferInfo.status} />
           </div>
           <div className="border border-[#D6DCE8] rounded-xl px-4 py-2">
             <InfoRow label="No telp Penerima" value={receiverPhone} />

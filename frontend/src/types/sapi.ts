@@ -19,3 +19,12 @@ export interface SapiFilter {
   minAge?: number;
   maxAge?: number;
 }
+
+export interface CowData {
+  cowCode: string;
+  display_name: string;
+  breed: string;
+  sex: string;
+  status: string;
+  verification: "verified" | "unverified";
+}
