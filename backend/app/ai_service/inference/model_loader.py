@@ -6,7 +6,7 @@ from app.ai_service.model.embedding_net import EmbeddingNet
 
 EMBEDDING_DIM = 256
 MODEL_VERSION = "sapigo-embed-v1"
-WEIGHTS_PATH = "app/ai_service/inference/weights/embedding_model_arcface.pth"
+WEIGHTS_PATH = "app/ai_service/inference/weights/embedding_net.pth"
 
 _model_lock = threading.Lock()
 _model: EmbeddingNet | None = None
