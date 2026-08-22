@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Bell, Plus, History, ArrowLeftRight } from "lucide-react";
+import { Bell, Plus, History, ArrowLeftRight, Scan } from "lucide-react";
 import StatCard from "@/src/components/home/StatCard";
 import QuickAction from "@/src/components/home/QuickAction";
 import CowCard from "@/src/components/home/CowCard";
@@ -65,6 +65,11 @@ export default function HomePage() {
             onClick={() => router.push("/riwayat")}
             icon={<History />}
             label="Transfer History"
+          />
+          <QuickAction
+            onClick={() => router.push("/verification/scan")}
+            icon={<Scan />}
+            label="Cow Verification"
           />
         </div>
 

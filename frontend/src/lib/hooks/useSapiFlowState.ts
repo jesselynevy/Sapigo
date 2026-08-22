@@ -30,7 +30,7 @@ function writeStorage(state: StoredState) {
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-export function useDaftarSapiState() {
+export function useSapiFlowState() {
   const [qrPhoto, setQrPhotoState] = useState<File | null>(null);
   const [muzzlePhoto, setMuzzlePhotoState] = useState<File | null>(null);
   const [cowData, setCowDataState] = useState<CowData | null>(null);

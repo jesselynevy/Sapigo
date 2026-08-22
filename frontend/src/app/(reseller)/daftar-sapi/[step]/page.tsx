@@ -7,8 +7,9 @@ import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
 import PhotoInput from "@/src/components/ui/PhotoInput";
 import InfoRow from "@/src/components/ui/InfoRow";
 import StatusBadge from "@/src/components/ui/StatusBadge";
-import { useDaftarSapiState } from "@/src/lib/hooks/useDaftarSapiState";
+import { useSapiFlowState } from "@/src/lib/hooks/useSapiFlowState";
 import { decodeQrAndFetch } from "@/src/lib/utils/decodeQrAndFetch";
+import router from "next/router";
 
 const TOTAL_STEPS = 4;
 
@@ -27,7 +28,7 @@ export default function DaftarSapiStepPage() {
     setCowData,
     clearAll,
     hydrated,
-  } = useDaftarSapiState();
+  } = useSapiFlowState();
 
   const [loading, setLoading] = useState(false);
   const goToStep = (s: number) => router.push(`/daftar-sapi/${s}`);
@@ -42,7 +43,9 @@ export default function DaftarSapiStepPage() {
 
   useEffect(() => {
     if (step === 1 && qrPhoto && !cowData) {
-      decodeQrAndFetch(qrPhoto, setError, setCowData, goToStep, 2);
+      decodeQrAndFetch(qrPhoto, setError, setCowData, () => {
+        goToStep(2);
+      });
     }
   }, [step, cowData, qrPhoto, setCowData, goToStep]);
 

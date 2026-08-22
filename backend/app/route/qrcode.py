@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/animals/{cow_id}/qrcode")
 def generate_cow_qr(cow_id: str):
-    qr_data = f"http://localhost:3000/animals/{cow_id}"
+    qr_data = f"http://localhost:3000/verification/{cow_id}"
 
     qr = qrcode.QRCode(version=1, box_size=10, border=2)
     qr.add_data(qr_data)

@@ -6,8 +6,7 @@ export async function decodeQrAndFetch(
   photo: File,
   setError: Dispatch<SetStateAction<string | null>>,
   setCowData: (data: CowData | null) => void,
-  goToStep: (s: number) => void,
-  nextStep: number,
+  onSuccess: (cowId: string, data: CowData) => void,
 ) {
   setError(null);
 
@@ -44,15 +43,17 @@ export async function decodeQrAndFetch(
     const data = await res.json();
 
     // 5. Map backend response into whatever shape transferInfo expects
-    setCowData({
+    const cowData: CowData = {
       cowCode: data.id,
       display_name: data.display_name,
       breed: data.breed,
       sex: data.sex,
       status: data.status,
-    });
+    };
 
-    goToStep(nextStep);
+    setCowData(cowData);
+
+    onSuccess(cowId, cowData);
   } catch (err) {
     setError("Failed to fetch cow data.");
   }
