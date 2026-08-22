@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     DATABASE_SOURCE: str = "local"
     DATABASE_URL: str = ""
 
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY:str = ""
+    CLOUDINARY_API_SECRET:str = ""
+
     @model_validator(mode="after")
     def build_database_url(self):
         if not self.DATABASE_URL:
