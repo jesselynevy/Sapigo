@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
+from app.core.exceptions import ImageQualityRejected
 from app.model.enums import MediaType
 from app.schema.media_asset import MediaAssetRead
 from app.service.media_asset_service import MediaAssetService
@@ -22,13 +23,19 @@ async def upload_media_asset(
     db: Session = Depends(get_db),
 ):
     service = MediaAssetService(db)
-    return await service.upload_photo(
-        file=file,
-        uploaded_by_user_id=uploaded_by_user_id,
-        animal_id=animal_id,
-        muzzle_template_id=muzzle_template_id,
-        media_type=media_type,
-    )
+    try:
+        return await service.upload_photo(
+            file=file,
+            uploaded_by_user_id=uploaded_by_user_id,
+            animal_id=animal_id,
+            muzzle_template_id=muzzle_template_id,
+            media_type=media_type,
+        )
+    except ImageQualityRejected as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error": "image_rejected", "reasons": e.reasons, "scores": e.scores},
+        )
 
 
 @router.get("/{id}", response_model=MediaAssetRead)

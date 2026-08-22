@@ -5,9 +5,11 @@ from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app.core.cloudinary import upload_to_cloudinary
+from app.core.exceptions import ImageQualityRejected
 from app.model.enums import MediaType
 from app.model.media_asset import MediaAsset
 from app.repository.media_asset_repo import MediaAssetRepository
+from app.utils.image_quality import assess_quality
 
 
 class MediaAssetService:
@@ -23,6 +25,14 @@ class MediaAssetService:
         muzzle_template_id: Optional[UUID] = None,
         media_type: MediaType = MediaType.MUZZLE_PHOTO,
     ) -> MediaAsset:
+        raw_bytes = await file.read()
+
+        result = assess_quality(raw_bytes)
+        if not result.accepted:
+            raise ImageQualityRejected(reasons=result.reasons, scores=result.scores)
+
+        # rewind so upload_to_cloudinary can read the file stream again
+        await file.seek(0)
         upload_result = await upload_to_cloudinary(file)
 
         return self.repo.create(
