@@ -67,7 +67,7 @@ class TwilioVerifyService:
     def start_verification(self, whatsapp_number: str) -> VerificationResult:
         return self._post(
             "Verifications",
-            {"To": whatsapp_number, "Channel": "whatsapp"},
+            {"To": whatsapp_number, "Channel": settings.TWILIO_VERIFY_CHANNEL},
         )
 
     def check_verification(
