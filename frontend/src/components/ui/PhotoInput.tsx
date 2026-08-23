@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Camera, RotateCcw, X } from "lucide-react";
+import { Camera, ImageUp, RotateCcw, X } from "lucide-react";
 
 interface PhotoInputProps {
   value: File | null;
@@ -23,6 +23,7 @@ export default function PhotoInput({
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   // generate/cleanup preview url dari file yang sudah diambil
@@ -102,6 +103,19 @@ export default function PhotoInput({
     setIsCameraOpen(false);
   };
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file (JPG, PNG, or WEBP).");
+      return;
+    }
+    setError(null);
+    onChange(file);
+    // Allows selecting the same file again after a quality-gate rejection.
+    event.target.value = "";
+  };
+
   // ---- camera view (fullscreen-ish overlay dalam card) ----
   if (isCameraOpen) {
     return (
@@ -142,6 +156,13 @@ export default function PhotoInput({
   // ---- default state: preview atau placeholder, tap untuk buka kamera ----
   return (
     <div className="w-full flex flex-col gap-2">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFileSelect}
+      />
       <div
         onClick={startCamera}
         className="w-full aspect-square bg-white border border-[#D6DCE8] rounded-xl flex items-center justify-center cursor-pointer overflow-hidden"
@@ -160,15 +181,22 @@ export default function PhotoInput({
         )}
       </div>
 
-      {preview && (
+      <div className="flex justify-center gap-4 text-sm">
         <button
           type="button"
           onClick={startCamera}
-          className="text-primary text-sm underline self-center"
+          className="text-primary underline"
         >
-          Ambil ulang foto
+          <span className="inline-flex items-center gap-1"><Camera className="w-4 h-4" />{preview ? "Retake with camera" : "Use camera"}</span>
         </button>
-      )}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="text-primary underline"
+        >
+          <span className="inline-flex items-center gap-1"><ImageUp className="w-4 h-4" />Choose image file</span>
+        </button>
+      </div>
 
       {error && <p className="text-red-500 text-xs text-center">{error}</p>}
     </div>
