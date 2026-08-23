@@ -1,9 +1,20 @@
-from fastapi import FastAPI
-from app.route import routers
 import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.config import settings
+from app.route import routers
 
 app = FastAPI()
+
+if settings.AUTH_FRONTEND_ORIGIN:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.AUTH_FRONTEND_ORIGIN],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_headers=["Content-Type", "X-CSRF-Token"],
+    )
 
 
 for router in routers:

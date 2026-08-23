@@ -123,3 +123,9 @@ class AuthService:
         if user is None or not user.is_active:
             raise InvalidTokenAuthenticationError("Invalid access token")
         return user
+
+    def update_profile(self, user: User, full_name: str) -> User:
+        updated_user = self.users.update(user.id, full_name=full_name)
+        if updated_user is None:
+            raise InvalidTokenAuthenticationError("Invalid access token")
+        return updated_user
