@@ -45,7 +45,7 @@ export default function CowSummaryPage() {
   const handleBack = () => router.push("/home");
   const verificationPath = `/verification/${cowId}/3${ownerId ? `?owner_id=${encodeURIComponent(ownerId)}` : ""}`;
   const handleNext = () => router.push(verificationPath);
-  const handleRescan = () => router.push("/verification/scan");
+  const handleRescan = () => router.push("/verification");
 
   if (loading) {
     return (
@@ -68,7 +68,7 @@ export default function CowSummaryPage() {
           onClick={handleRescan}
           className="bg-primary text-white px-6 py-2 rounded-lg"
         >
-          Scan Ulang
+          Choose another cow
         </button>
       </div>
     );
@@ -102,7 +102,7 @@ export default function CowSummaryPage() {
             <button
               onClick={handleRescan}
               className="text-primary"
-              title="Scan ulang"
+              title="Choose another cow"
             >
               <RotateCw className="w-4 h-4" />
             </button>

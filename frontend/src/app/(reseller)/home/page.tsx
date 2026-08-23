@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, Bell, History, LogOut, Plus, Scan } from "lucide-react";
+import { ArrowLeftRight, History, LogOut, Plus, Scan } from "lucide-react";
 
 import CowCard from "@/src/components/home/CowCard";
 import QuickAction from "@/src/components/home/QuickAction";
@@ -97,16 +97,6 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push("/notifikasi")}
-              className="relative cursor-pointer"
-              aria-label="Notifikasi"
-            >
-              <Bell className="text-white w-8 h-8" />
-              <span className="absolute -top-1 -right-1 bg-red-700 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">
-                2
-              </span>
-            </button>
             <button
               type="button"
               onClick={() => void handleLogout()}

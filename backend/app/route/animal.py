@@ -30,10 +30,15 @@ def list_animals(
     limit: int = 100,
     status_filter: Optional[AnimalStatus] = Query(None, alias="status"),
     owner_id: Optional[uuid.UUID] = Query(None),
+    include_transferred: bool = Query(False),
     service: AnimalService = Depends(get_animal_service),
 ) -> List[AnimalRead]:
     return service.list_animals(
-        skip=skip, limit=limit, status=status_filter, owner_id=owner_id
+        skip=skip,
+        limit=limit,
+        status=status_filter,
+        owner_id=owner_id,
+        include_transferred=include_transferred,
     )
 
 

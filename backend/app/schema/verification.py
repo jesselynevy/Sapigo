@@ -19,3 +19,9 @@ class VerificationRead(BaseModel):
     model_version: str
     quality_flags: dict | None
     created_at: datetime
+
+
+class TransferRead(BaseModel):
+    verification: VerificationRead
+    transferred: bool
+    transferred_at: datetime | None

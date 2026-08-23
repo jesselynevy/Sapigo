@@ -10,6 +10,8 @@ interface AnimalApiResponse {
   sex: string | null;
   weight: number | null;
   status: string;
+  created_at: string;
+  transferred_at: string | null;
 }
 
 export interface MediaAssetApiResponse {
@@ -32,6 +34,12 @@ export interface VerificationApiResponse {
   similarity_score: number;
   decision: "verified" | "manual_review" | "mismatch";
   created_at: string;
+}
+
+export interface TransferApiResponse {
+  verification: VerificationApiResponse;
+  transferred: boolean;
+  transferred_at: string | null;
 }
 
 export interface CreateAnimalInput {
@@ -61,6 +69,8 @@ function mapToCowData(data: AnimalApiResponse): CowData {
     sex: data.sex ?? "",
     weight: data.weight,
     status: data.status,
+    createdAt: data.created_at,
+    transferredAt: data.transferred_at,
     verification: "unverified",
   };
 }
@@ -71,24 +81,10 @@ export async function getCowData(cowId: string, ownerId?: string): Promise<CowDa
   return mapToCowData(data);
 }
 
-export async function listAnimals(ownerId: string): Promise<CowData[]> {
-  const data = await apiClient<AnimalApiResponse[]>(`/api/animals?owner_id=${encodeURIComponent(ownerId)}`);
+export async function listAnimals(ownerId: string, includeTransferred = false): Promise<CowData[]> {
+  const transferred = includeTransferred ? "&include_transferred=true" : "";
+  const data = await apiClient<AnimalApiResponse[]>(`/api/animals?owner_id=${encodeURIComponent(ownerId)}${transferred}`);
   return data.map(mapToCowData);
-}
-
-export interface VerificationLinkApiResponse {
-  animal_id: string;
-  owner_id: string;
-  url: string;
-}
-
-export async function getVerificationLink(animalId: string): Promise<VerificationLinkApiResponse> {
-  return apiClient<VerificationLinkApiResponse>(`/api/animals/${animalId}/verification-link`);
-}
-
-export function getQrCodeUrl(animalId: string): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  return `${apiUrl}/api/animals/${animalId}/qrcode`;
 }
 
 export async function createAnimal(input: CreateAnimalInput): Promise<CowData> {
@@ -153,6 +149,22 @@ export async function verifyAnimal(
   formData.append("file", file);
   formData.append("owner_id", ownerId);
   return apiClient<VerificationApiResponse>(`/api/animals/${animalId}/verify`, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export async function transferAnimal(
+  animalId: string,
+  ownerId: string,
+  receiverPhone: string,
+  file: File,
+): Promise<TransferApiResponse> {
+  const formData = new FormData();
+  formData.append("owner_id", ownerId);
+  formData.append("receiver_phone", receiverPhone);
+  formData.append("file", file);
+  return apiClient<TransferApiResponse>(`/api/animals/${animalId}/transfer`, {
     method: "POST",
     body: formData,
   });

@@ -89,7 +89,7 @@ export default function VerificationStepPage() {
     goToStep(step - 1);
   };
 
-  const handleRescan = () => router.push("/verification/scan");
+  const handleRescan = () => router.push("/verification");
 
   const handleNext = () => {
     if (step === 3) {

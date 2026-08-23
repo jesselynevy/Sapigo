@@ -2,7 +2,6 @@ from app.route.animal import router as animal_router
 from app.route.auth import router as auth_router
 from app.route.media_asset import router as media_asset_router
 from app.route.muzzle_template import router as muzzle_template_router
-from app.route.qrcode import router as qrcode_router
 from app.route.verification import router as verification_router
 
 routers = [
@@ -11,7 +10,6 @@ routers = [
     media_asset_router,
     muzzle_template_router,
     verification_router,
-    qrcode_router,
 ]
 
 __all__ = [
@@ -19,7 +17,6 @@ __all__ = [
     "auth_router",
     "media_asset_router",
     "muzzle_template_router",
-    "qrcode_router",
-    "routers",
     "verification_router",
+    "routers",
 ]

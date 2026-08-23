@@ -7,7 +7,7 @@ import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
 import PhotoInput from "@/src/components/ui/PhotoInput";
 import InfoRow from "@/src/components/ui/InfoRow";
 import { ApiError } from "@/src/lib/api/client";
-import { createAnimal, enrollAnimalFromPhotos, getQrCodeUrl, ReferencePhotoUploadError } from "@/src/lib/api/sapi";
+import { createAnimal, enrollAnimalFromPhotos, ReferencePhotoUploadError } from "@/src/lib/api/sapi";
 import { useSapiFlowState } from "@/src/lib/hooks/useSapiFlowState";
 import { useAuthStore } from "@/src/store/useAuthStore";
 
@@ -153,7 +153,7 @@ export default function DaftarSapiStepPage() {
 
       {step === 4 && (
         <div className="flex-1 w-full flex flex-col items-center justify-center gap-2 border border-[#D6DCE8] rounded-xl">
-          {enrolled || cowData ? <><CheckCircle2 className="w-16 h-16 text-green-700" /><p className="text-center font-bold text-black px-8">{cowData?.display_name}&apos;s muzzle template is enrolled.</p><p className="text-center text-sm text-gray-500 px-8">This owner-bound QR code is ready to put on the ear tag.</p>{cowData && <img className="h-36 w-36" src={getQrCodeUrl(cowData.cowCode)} alt={`Verification QR code for ${cowData.display_name}`} />}</> : <p className="text-center text-red-600">Enrollment result is unavailable. Please try again.</p>}
+          {enrolled || cowData ? <><CheckCircle2 className="w-16 h-16 text-green-700" /><p className="text-center font-bold text-black px-8">{cowData?.display_name}&apos;s muzzle template is enrolled.</p><p className="text-center text-sm text-gray-500 px-8">Cow-in recorded. You can now verify or transfer this cow using a live muzzle photo.</p></> : <p className="text-center text-red-600">Enrollment result is unavailable. Please try again.</p>}
         </div>
       )}
     </StepFlowLayout>

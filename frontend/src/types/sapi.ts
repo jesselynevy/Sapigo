@@ -28,5 +28,7 @@ export interface CowData {
   sex: string;
   weight: number | null;
   status: string;
+  createdAt: string;
+  transferredAt: string | null;
   verification: "verified" | "unverified";
 }

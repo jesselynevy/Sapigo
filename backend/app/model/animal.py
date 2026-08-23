@@ -45,6 +45,7 @@ class Animal(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.now()
     )
+    transferred_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     muzzle_templates: Mapped[list["MuzzleTemplate"]] = relationship(
         back_populates="animal"

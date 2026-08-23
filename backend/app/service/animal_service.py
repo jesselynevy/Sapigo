@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -40,12 +41,27 @@ class AnimalService:
         limit: int = 100,
         status: Optional[AnimalStatus] = None,
         owner_id: Optional[uuid.UUID] = None,
+        include_transferred: bool = False,
     ) -> List[Animal]:
         if owner_id is not None:
-            return self.repo.get_by_owner(owner_id, skip=skip, limit=limit)
+            return self.repo.get_by_owner(
+                owner_id,
+                skip=skip,
+                limit=limit,
+                include_transferred=include_transferred,
+            )
         if status is not None:
             return self.repo.get_by_status(status, skip=skip, limit=limit)
         return self.repo.get_all(skip=skip, limit=limit)
+
+    def mark_transferred(self, animal_id: uuid.UUID, owner_id: uuid.UUID) -> Animal:
+        animal = self.get_owned_animal(animal_id, owner_id)
+        if animal.transferred_at is not None:
+            raise ValueError(f"Animal '{animal_id}' has already been transferred")
+        animal.transferred_at = datetime.now()
+        self.db.commit()
+        self.db.refresh(animal)
+        return animal
 
     def update_animal(self, animal_id: uuid.UUID, data: AnimalUpdate) -> Animal:
         if self.repo.get(animal_id) is None:

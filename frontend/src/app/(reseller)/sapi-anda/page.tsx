@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
 import PageHeader from "@/src/components/ui/PageHeader";
 import Button from "@/src/components/ui/Button";
 import StatusBadge from "@/src/components/ui/StatusBadge";
 import CowDetailModal, {
   CowDetail,
 } from "@/src/components/sapi/CowDetailModal";
-import { useCopyToClipboard } from "@/src/components/ui/useCopyToClipboard";
-import { getVerificationLink, listAnimals } from "@/src/lib/api/sapi";
+import { listAnimals } from "@/src/lib/api/sapi";
 import { useAuthStore } from "@/src/store/useAuthStore";
 
 interface Cow extends CowDetail {
@@ -24,8 +22,6 @@ export default function SapiAndaPage() {
 
   const [selectedCow, setSelectedCow] = useState<Cow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const { copy, copied } = useCopyToClipboard();
-  const [copiedCowId, setCopiedCowId] = useState<string | null>(null);
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -52,17 +48,6 @@ export default function SapiAndaPage() {
   const handleViewDetail = (cow: Cow) => {
     setSelectedCow(cow);
     setModalOpen(true);
-  };
-
-  const handleCreateLink = async (cow: Cow) => {
-    try {
-      const { url } = await getVerificationLink(cow.cowCode);
-      await copy(url);
-      setCopiedCowId(cow.id);
-      setTimeout(() => setCopiedCowId(null), 2000);
-    } catch {
-      setError("Could not create the verification link. Please try again.");
-    }
   };
 
   return (
@@ -99,19 +84,6 @@ export default function SapiAndaPage() {
                 View Details
               </Button>
 
-              <button
-                onClick={() => handleCreateLink(cow)}
-                className="text-primary text-sm underline self-center flex items-center gap-1"
-              >
-                {copiedCowId === cow.id ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    Link copied!
-                  </>
-                ) : (
-                  "Create info link"
-                )}
-              </button>
             </div>
           ))
         )}

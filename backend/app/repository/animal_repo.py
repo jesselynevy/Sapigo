@@ -21,12 +21,13 @@ class AnimalRepository(BaseRepository[Animal]):
         )
 
     def get_by_owner(
-        self, owner_id: UUID, skip: int = 0, limit: int = 100
+        self,
+        owner_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        include_transferred: bool = False,
     ) -> List[Animal]:
-        return (
-            self.db.query(self.model)
-            .filter(self.model.owner_id == owner_id)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+        query = self.db.query(self.model).filter(self.model.owner_id == owner_id)
+        if not include_transferred:
+            query = query.filter(self.model.transferred_at.is_(None))
+        return query.offset(skip).limit(limit).all()

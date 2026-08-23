@@ -34,9 +34,4 @@ class AnimalRead(AnimalBase):
 
     id: uuid.UUID
     created_at: datetime
-
-
-class VerificationLinkRead(BaseModel):
-    animal_id: uuid.UUID
-    owner_id: uuid.UUID
-    url: str
+    transferred_at: datetime | None
