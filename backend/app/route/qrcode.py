@@ -1,21 +1,44 @@
-from fastapi import APIRouter
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.core.db import get_db
+from app.schema.animal import VerificationLinkRead
+from app.service.animal_service import AnimalNotFoundError, AnimalService
 from app.service.qr_service import generate_qr_image
-import qrcode 
-import io
 
 router = APIRouter()
 
-@router.get("/animals/{cow_id}/qrcode")
-def generate_cow_qr(cow_id: str):
-    qr_data = f"http://localhost:3000/verification/{cow_id}"
+def verification_url(animal_id: UUID, owner_id: UUID) -> str:
+    base_url = settings.FRONTEND_BASE_URL.rstrip("/")
+    return f"{base_url}/verification/{animal_id}?owner_id={owner_id}"
 
-    qr = qrcode.QRCode(version=1, box_size=10, border=2)
-    qr.add_data(qr_data)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    
-    return StreamingResponse(buf, media_type="image/png")
+
+def get_animal_or_404(animal_id: UUID, db: Session) -> tuple[UUID, UUID]:
+    try:
+        animal = AnimalService(db).get_animal(animal_id)
+    except AnimalNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return animal.id, animal.owner_id
+
+
+@router.get("/animals/{animal_id}/verification-link", response_model=VerificationLinkRead)
+def get_verification_link(animal_id: UUID, db: Session = Depends(get_db)):
+    animal_id, owner_id = get_animal_or_404(animal_id, db)
+    return VerificationLinkRead(
+        animal_id=animal_id,
+        owner_id=owner_id,
+        url=verification_url(animal_id, owner_id),
+    )
+
+
+@router.get("/animals/{animal_id}/qrcode")
+def generate_cow_qr(animal_id: UUID, db: Session = Depends(get_db)):
+    animal_id, owner_id = get_animal_or_404(animal_id, db)
+    return StreamingResponse(
+        generate_qr_image(verification_url(animal_id, owner_id)),
+        media_type="image/png",
+    )
