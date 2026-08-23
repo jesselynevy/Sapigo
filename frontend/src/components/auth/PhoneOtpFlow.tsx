@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Link from "next/link";
+import { useRef, useState } from "react";
+
+import AuthScreenLayout from "@/src/components/auth/AuthScreenLayout";
 import Button from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
 
 interface PhoneOtpFlowProps {
-  title: string; // "Masuk" | "Daftar"
-  bottomText: string; // "Belum punya akun?" | "Sudah punya akun?"
-  bottomLinkText: string; // "Bikin akun" | "Masuk"
-  bottomLinkHref: string; // "/daftar" | "/masuk"
+  title: string;
   onSubmitPhone: (phone: string) => Promise<void>;
   onSubmitOtp: (otp: string) => Promise<void>;
   onResendOtp: () => Promise<void>;
@@ -17,9 +15,6 @@ interface PhoneOtpFlowProps {
 
 export default function PhoneOtpFlow({
   title,
-  bottomText,
-  bottomLinkText,
-  bottomLinkHref,
   onSubmitPhone,
   onSubmitOtp,
   onResendOtp,
@@ -28,19 +23,29 @@ export default function PhoneOtpFlow({
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
     setLoading(true);
     try {
       if (step === "phone") {
         await onSubmitPhone(phone);
         setStep("otp");
       } else {
+        if (otp.some((digit) => !digit)) {
+          throw new Error("Masukkan enam digit kode OTP.");
+        }
         await onSubmitOtp(otp.join(""));
       }
+    } catch (submissionError) {
+      setError(
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Terjadi kesalahan. Silakan coba lagi.",
+      );
     } finally {
       setLoading(false);
     }
@@ -48,12 +53,9 @@ export default function PhoneOtpFlow({
 
   const handleOtpChange = (index: number, value: string) => {
     if (value && !/^[0-9]$/.test(value)) return;
-
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
-    // pindah ke field berikutnya kalau ada isinya
     if (value && index < otp.length - 1) {
       otpRefs.current[index + 1]?.focus();
     }
@@ -61,67 +63,80 @@ export default function PhoneOtpFlow({
 
   const handleOtpKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
+    event: React.KeyboardEvent<HTMLInputElement>,
   ) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
+    if (event.key === "Backspace" && !otp[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
   };
 
-  return (
-    <div className="min-h-screen relative flex items-start justify-center py-12 px-4 sm:px-6 lg:px-8 bg-primary">
-      <h1 className="text-white text-3xl font-jakarta font-bold mt-4">
-        {title}
-      </h1>
+  const handleResend = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await onResendOtp();
+    } catch (resendError) {
+      setError(
+        resendError instanceof Error
+          ? resendError.message
+          : "Kode OTP belum dapat dikirim ulang.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  return (
+    <AuthScreenLayout title={title}>
       <form
         onSubmit={handleSubmit}
-        className="container mx-auto flex bg-white py-8 px-4 absolute bottom-0 flex-col rounded-t-[40px] items-center h-[83vh]"
+        className="container mx-auto absolute bottom-0 flex h-[83vh] flex-col items-center rounded-t-[40px] bg-white px-4 py-8"
       >
-        <div className="w-full flex flex-col gap-4">
+        <div className="flex w-full flex-col gap-4">
           {step === "phone" ? (
             <Input
               label="Masukkan nomor telepon anda"
               placeholder="+62 XXXXXXXXXXXX"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(event) => setPhone(event.target.value)}
             />
           ) : (
-            <div className="w-full flex flex-col items-center gap-4">
-              <p className="font-bold text-xl text-black text-center">
+            <div className="flex w-full flex-col items-center gap-4">
+              <p className="text-center text-xl font-bold text-black">
                 Masukkan kode OTP
               </p>
               <div className="flex gap-2">
-                {otp.map((digit, i) => (
+                {otp.map((digit, index) => (
                   <input
-                    ref={(el) => {
-                      otpRefs.current[i] = el;
+                    ref={(element) => {
+                      otpRefs.current[index] = element;
                     }}
-                    key={i}
+                    key={index}
                     maxLength={1}
                     value={digit}
-                    onChange={(e) => handleOtpChange(i, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className="w-14 h-15 text-black text-2xl text-center border border-[#D6DCE8] rounded-md focus:outline-none focus:ring-[1.5px] focus:ring-primary"
+                    onChange={(event) => handleOtpChange(index, event.target.value)}
+                    onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                    className="h-15 w-14 rounded-md border border-[#D6DCE8] text-center text-2xl text-black focus:outline-none focus:ring-[1.5px] focus:ring-primary"
                   />
                 ))}
               </div>
               <button
                 type="button"
-                className="text-primary text-sm underline"
-                onClick={onResendOtp}
+                disabled={loading}
+                className="text-sm text-primary underline"
+                onClick={handleResend}
               >
                 Kirim ulang kode OTP
               </button>
             </div>
           )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
-        <div className="w-full mt-auto flex flex-col items-center gap-4">
+        <div className="mt-auto flex w-full flex-col items-center gap-4">
           <Button type="submit" disabled={loading} className="w-full">
             OK
           </Button>
-
           {step === "otp" && (
             <Button
               type="button"
@@ -135,15 +150,8 @@ export default function PhoneOtpFlow({
               Kembali
             </Button>
           )}
-
-          <p className="text-sm text-gray-500">
-            {bottomText}{" "}
-            <Link href={bottomLinkHref} className="text-primary underline">
-              {bottomLinkText}
-            </Link>
-          </p>
         </div>
       </form>
-    </div>
+    </AuthScreenLayout>
   );
 }
