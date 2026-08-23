@@ -1,5 +1,5 @@
 export interface StatCardProps {
-  value: number;
+  value: number | string;
   label: string;
 }
 
