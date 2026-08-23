@@ -13,6 +13,7 @@ export default function ScanQrStep() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [decodedCowId, setDecodedCowId] = useState<string | null>(null);
+  const [decodedOwnerId, setDecodedOwnerId] = useState<string | null>(null);
 
   const { qrPhoto, setQrPhoto, cowData, setCowData, hydrated } =
     useSapiFlowState();
@@ -21,19 +22,20 @@ export default function ScanQrStep() {
     router.push("/home");
   };
 
-  const canProceed = () => !!decodedCowId;
+  const canProceed = () => !!decodedCowId && !!decodedOwnerId;
 
   useEffect(() => {
     if (qrPhoto) {
-      decodeQrAndFetch(qrPhoto, setError, setCowData, (cowId) => {
+      decodeQrAndFetch(qrPhoto, setError, setCowData, (cowId, cowData) => {
         setDecodedCowId(cowId);
+        setDecodedOwnerId(cowData.ownerId);
       });
     }
   }, [qrPhoto, cowData, setCowData]);
 
   const handleNext = () => {
-    if (decodedCowId) {
-      router.push(`/verification/${decodedCowId}`);
+    if (decodedCowId && decodedOwnerId) {
+      router.push(`/verification/${decodedCowId}?owner_id=${encodeURIComponent(decodedOwnerId)}`);
     }
   };
 

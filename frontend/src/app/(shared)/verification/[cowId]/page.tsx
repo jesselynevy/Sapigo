@@ -6,7 +6,7 @@ import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
 import { getCowData } from "@/src/lib/api/sapi";
 import { CowData } from "@/src/types/sapi";
 import { RotateCw } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const TOTAL_STEPS = 4;
@@ -15,6 +15,8 @@ export default function CowSummaryPage() {
   const router = useRouter();
   const params = useParams<{ cowId: string }>();
   const { cowId } = params;
+  const searchParams = useSearchParams();
+  const ownerId = searchParams.get("owner_id") ?? undefined;
 
   const [cowData, setCowData] = useState<CowData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function CowSummaryPage() {
     if (!cowId) return;
     let cancelled = false;
 
-    getCowData(cowId)
+    getCowData(cowId, ownerId)
       .then((data) => {
         if (!cancelled) setCowData(data);
       })
@@ -38,10 +40,11 @@ export default function CowSummaryPage() {
     return () => {
       cancelled = true;
     };
-  }, [cowId]);
+  }, [cowId, ownerId]);
 
   const handleBack = () => router.push("/home");
-  const handleNext = () => router.push(`/verification/${cowId}/3`);
+  const verificationPath = `/verification/${cowId}/3${ownerId ? `?owner_id=${encodeURIComponent(ownerId)}` : ""}`;
+  const handleNext = () => router.push(verificationPath);
   const handleRescan = () => router.push("/verification/scan");
 
   if (loading) {

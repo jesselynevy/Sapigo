@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import PageHeader from "@/src/components/ui/PageHeader";
 import Button from "@/src/components/ui/Button";
@@ -9,6 +9,8 @@ import CowDetailModal, {
   CowDetail,
 } from "@/src/components/sapi/CowDetailModal";
 import { useCopyToClipboard } from "@/src/components/ui/useCopyToClipboard";
+import { getVerificationLink, listAnimals } from "@/src/lib/api/sapi";
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 interface Cow extends CowDetail {
   id: string;
@@ -16,44 +18,36 @@ interface Cow extends CowDetail {
 }
 
 export default function SapiAndaPage() {
-  // TODO: fetch dari API
-  const [cows] = useState<Cow[]>([
-    {
-      id: "1",
-      displayName: "Sapi ABCDE #ASDSD",
-      cowCode: "X-ASJAAJAJA-AJAJAJAJJA",
-      ownership: "Farmer ABC",
-      weight: 3,
-      breed: "Limousine",
-      verification: "verified",
-      receivedInfo: "Received on 12 Aug 2026",
-    },
-    {
-      id: "2",
-      displayName: "Sapi ABCDE #ASDSD",
-      cowCode: "X-ASJAAJAJA-AJAJAJAJJB",
-      ownership: "Farmer ABC",
-      weight: 3,
-      breed: "Limousine",
-      verification: "verified",
-      receivedInfo: "Received on 10 Aug 2026",
-    },
-    {
-      id: "3",
-      displayName: "Sapi ABCDE #ASDSD",
-      cowCode: "X-ASJAAJAJA-AJAJAJAJJC",
-      ownership: "Farmer ABC",
-      weight: 3,
-      breed: "Limousine",
-      verification: "verified",
-      receivedInfo: "Received on 5 Aug 2026",
-    },
-  ]);
+  const [cows, setCows] = useState<Cow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedCow, setSelectedCow] = useState<Cow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const { copy, copied } = useCopyToClipboard();
   const [copiedCowId, setCopiedCowId] = useState<string | null>(null);
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setError("Sign in as a reseller to see your cows.");
+      setLoading(false);
+      return;
+    }
+    listAnimals(user.id)
+      .then((animals) => setCows(animals.map((animal) => ({
+        id: animal.cowCode,
+        displayName: animal.display_name,
+        cowCode: animal.cowCode,
+        ownership: user.name,
+        weight: animal.weight,
+        breed: animal.breed || "Not available",
+        verification: "unverified",
+        receivedInfo: `Status: ${animal.status}`,
+      }))))
+      .catch(() => setError("Could not load cows from the backend."))
+      .finally(() => setLoading(false));
+  }, [user?.id, user?.name]);
 
   const handleViewDetail = (cow: Cow) => {
     setSelectedCow(cow);
@@ -61,11 +55,14 @@ export default function SapiAndaPage() {
   };
 
   const handleCreateLink = async (cow: Cow) => {
-    // TODO: ganti dengan generate link sesungguhnya dari backend
-    const link = `https://yourapp.com/sapi/${cow.cowCode}`;
-    await copy(link);
-    setCopiedCowId(cow.id);
-    setTimeout(() => setCopiedCowId(null), 2000);
+    try {
+      const { url } = await getVerificationLink(cow.cowCode);
+      await copy(url);
+      setCopiedCowId(cow.id);
+      setTimeout(() => setCopiedCowId(null), 2000);
+    } catch {
+      setError("Could not create the verification link. Please try again.");
+    }
   };
 
   return (
@@ -73,7 +70,11 @@ export default function SapiAndaPage() {
       <PageHeader title="My Cows" />
 
       <div className="bg-white rounded-t-[40px] flex-1  px-7 py-8 flex flex-col gap-3">
-        {cows.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-400 text-sm text-center py-8">Loading cows...</p>
+        ) : error ? (
+          <p className="text-red-600 text-sm text-center py-8">{error}</p>
+        ) : cows.length === 0 ? (
           <p className="text-gray-400 text-sm text-center py-8">
             You don't have any registered cows yet.
           </p>

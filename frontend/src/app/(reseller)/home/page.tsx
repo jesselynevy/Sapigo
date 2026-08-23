@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Bell, Plus, History, ArrowLeftRight, Scan } from "lucide-react";
 import StatCard from "@/src/components/home/StatCard";
 import QuickAction from "@/src/components/home/QuickAction";
@@ -8,9 +7,28 @@ import CowCard from "@/src/components/home/CowCard";
 import ActivityCard from "@/src/components/home/ActivityCard";
 import SectionHeader from "@/src/components/home/SectionHeader";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { listAnimals } from "@/src/lib/api/sapi";
+import { CowData } from "@/src/types/sapi";
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 export default function HomePage() {
   const router = useRouter();
+  const [cows, setCows] = useState<CowData[]>([]);
+  const [loadingCows, setLoadingCows] = useState(true);
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setCows([]);
+      setLoadingCows(false);
+      return;
+    }
+    listAnimals(user.id)
+      .then(setCows)
+      .catch(() => setCows([]))
+      .finally(() => setLoadingCows(false));
+  }, [user?.id]);
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-primary">
@@ -41,9 +59,9 @@ export default function HomePage() {
         </div>
 
         <div className="flex gap-3">
-          <StatCard value={12} label="Registered Cows" />
-          <StatCard value={2} label="Sold This Month" />
-          <StatCard value={2} label="Pending Verification" />
+          <StatCard value={loadingCows ? "—" : cows.length} label="Registered Cows" />
+          <StatCard value="—" label="Sold This Month" />
+          <StatCard value="—" label="Pending Verification" />
         </div>
       </div>
 
@@ -67,7 +85,7 @@ export default function HomePage() {
             label="Transfer History"
           />
           <QuickAction
-            onClick={() => router.push("/verification/scan")}
+            onClick={() => router.push("/verification")}
             icon={<Scan />}
             label="Cow Verification"
           />
@@ -81,16 +99,15 @@ export default function HomePage() {
               router.push("/sapi-anda");
             }}
           />
-          <CowCard
-            name="Cow ABCDE"
-            subtitle="Reception info: when?"
-            status="verified"
-          />
-          <CowCard
-            name="Cow ABCDE"
-            subtitle="Reception info: when?"
-            status="unverified"
-          />
+          {loadingCows ? (
+            <p className="text-sm text-gray-400">Loading cows...</p>
+          ) : cows.length === 0 ? (
+            <p className="text-sm text-gray-400">No cows registered yet.</p>
+          ) : (
+            cows.slice(0, 2).map((cow) => (
+              <CowCard key={cow.cowCode} name={cow.display_name} subtitle={`ID: ${cow.cowCode}`} status="unverified" />
+            ))
+          )}
         </div>
 
         {/* recent activity */}
@@ -101,14 +118,7 @@ export default function HomePage() {
               router.push("/aktivitas");
             }}
           />
-          <ActivityCard
-            title="Cow ABCDE"
-            subtitle="Successfully verified by buyer #ASDBSD"
-          />
-          <ActivityCard
-            title="Cow ABCDE"
-            subtitle="Successfully verified by buyer #ASDBSD"
-          />
+          <p className="text-sm text-gray-400">Activity history is not available from the backend yet.</p>
         </div>
       </div>
     </div>
