@@ -13,8 +13,8 @@ from app.model.enums import AnimalStatus
 if TYPE_CHECKING:
     from app.model.media_asset import MediaAsset
     from app.model.muzzle_template import MuzzleTemplate
-    from app.model.verification import Verification
     from app.model.user import User
+    from app.model.verification import Verification
 
 # Table for the cow
 
@@ -25,8 +25,8 @@ class Animal(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    owner_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True
     )
 
     display_name: Mapped[str] = mapped_column(String(255), nullable=False)

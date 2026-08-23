@@ -33,5 +33,6 @@ class AnimalRead(AnimalBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    owner_id: uuid.UUID | None
     created_at: datetime
     transferred_at: datetime | None
