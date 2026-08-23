@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.db import Base
 
 if TYPE_CHECKING:
+    from app.model.animal import Animal
     from app.model.media_asset import MediaAsset
     from app.model.verification import Verification
 
@@ -48,6 +49,7 @@ class User(Base):
     media_assets_uploaded: Mapped[list["MediaAsset"]] = relationship(
         back_populates="uploaded_by_user"
     )
+    animals: Mapped[list["Animal"]] = relationship(back_populates="owner")
 
     def __repr__(self) -> str:
         return f"<User id={self.id} whatsapp={self.whatsapp_number!r}>"
