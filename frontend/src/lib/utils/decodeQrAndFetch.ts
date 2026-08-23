@@ -1,6 +1,7 @@
 import jsQR from "jsqr";
 import { Dispatch, SetStateAction } from "react";
-import { CowData } from "../hooks/useTransferSapiState";
+import { CowData } from "@/src/types/sapi";
+import { getCowData } from "../api/sapi";
 
 export async function decodeQrAndFetch(
   photo: File,
@@ -25,9 +26,17 @@ export async function decodeQrAndFetch(
     setError("Could not read QR code. Try again with better lighting/focus.");
     return;
   }
-  ``;
-  // 3. Extract cow_id from the decoded URL
-  const cowId = code.data.split("/").pop();
+  // 3. Extract the canonical animal and owner identity from the QR URL.
+  let cowId: string | null = null;
+  let ownerId: string | undefined;
+  try {
+    const url = new URL(code.data);
+    cowId = url.pathname.split("/").filter(Boolean).pop() ?? null;
+    ownerId = url.searchParams.get("owner_id") ?? undefined;
+  } catch {
+    setError("QR code did not contain a valid verification link.");
+    return;
+  }
   if (!cowId) {
     setError("QR code did not contain a valid cow ID.");
     return;
@@ -35,21 +44,7 @@ export async function decodeQrAndFetch(
 
   // 4. Fetch cow data from your backend
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/animals/${cowId}`);
-    if (!res.ok) {
-      setError("Cow not found.");
-      return;
-    }
-    const data = await res.json();
-
-    // 5. Map backend response into whatever shape transferInfo expects
-    const cowData: CowData = {
-      cowCode: data.id,
-      display_name: data.display_name,
-      breed: data.breed,
-      sex: data.sex,
-      status: data.status,
-    };
+    const cowData: CowData = await getCowData(cowId, ownerId);
 
     setCowData(cowData);
 
