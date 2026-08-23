@@ -14,9 +14,24 @@ class Settings(BaseSettings):
     DATABASE_SOURCE: str = "local"
     DATABASE_URL: str = ""
 
+    APP_ENV: str = "production"
+
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_VERIFY_SERVICE_SID: str = ""
+
+    AUTH_JWT_SECRET: str = ""
+    AUTH_JWT_ALGORITHM: str = "HS256"
+    AUTH_ACCESS_TOKEN_MINUTES: int = 1440
+    AUTH_COOKIE_SECURE: bool = True
+    AUTH_FRONTEND_ORIGIN: str = ""
+    AUTH_OTP_PROVIDER: str = "twilio"
+    AUTH_STUB_WHATSAPP_NUMBER: str = ""
+    AUTH_STUB_OTP_CODE: str = ""
+
     CLOUDINARY_CLOUD_NAME: str = ""
-    CLOUDINARY_API_KEY:str = ""
-    CLOUDINARY_API_SECRET:str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
     FRONTEND_BASE_URL: str = "http://localhost:3000"
 
     @model_validator(mode="after")
