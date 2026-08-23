@@ -3,11 +3,9 @@ import secrets
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
-from sqlalchemy.orm import Session
 
+from app.core.auth import ACCESS_COOKIE_NAME, AuthServiceDependency, CurrentUser
 from app.core.config import settings
-from app.core.db import get_db
-from app.model.user import User
 from app.schema.auth import (
     AuthenticatedUserRead,
     OtpRequest,
@@ -18,26 +16,13 @@ from app.schema.auth import (
 from app.service.auth_service import (
     AuthenticationConfigurationError,
     AuthenticationError,
-    AuthService,
     InactiveUserError,
     InvalidOtpError,
-    InvalidTokenAuthenticationError,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-ACCESS_COOKIE_NAME = "sapigo_access"
 CSRF_COOKIE_NAME = "sapigo_csrf"
-
-DbSession = Annotated[Session, Depends(get_db)]
-
-
-def get_auth_service(db: DbSession) -> AuthService:
-    return AuthService(db)
-
-
-AuthServiceDependency = Annotated[AuthService, Depends(get_auth_service)]
-
 
 def _authentication_error(exc: AuthenticationError) -> HTTPException:
     if isinstance(exc, AuthenticationConfigurationError):
@@ -78,32 +63,6 @@ def _set_auth_cookies(response: Response, access_token: str) -> None:
         httponly=False,
         **common_cookie_options,
     )
-
-
-def get_current_user(
-    request: Request,
-    service: AuthServiceDependency,
-) -> User:
-    access_token = request.cookies.get(ACCESS_COOKIE_NAME)
-    if not access_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
-        )
-    try:
-        return service.get_current_user(access_token)
-    except (AuthenticationConfigurationError, InvalidTokenAuthenticationError) as exc:
-        raise HTTPException(
-            status_code=(
-                status.HTTP_503_SERVICE_UNAVAILABLE
-                if isinstance(exc, AuthenticationConfigurationError)
-                else status.HTTP_401_UNAUTHORIZED
-            ),
-            detail="Authentication required",
-        ) from exc
-
-
-CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 def require_csrf(

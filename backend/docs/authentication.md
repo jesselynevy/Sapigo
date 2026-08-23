@@ -67,19 +67,26 @@ Never enable `AUTH_OTP_PROVIDER=stub` outside local development.
 Supabase Auth is not a free phone-delivery provider: its phone login still
 requires an SMS provider.
 
-## Planned PR 4: authorization guard
+## Authorization guard
 
-PR 4 will add a reusable authentication dependency/guard in `app/core/auth.py`.
-It will centralize extracting the access cookie, validating the JWT through
-`AuthService`, and returning the active `User` to selected routes. The guard
-will be opt-in per router or endpoint, so public endpoints remain public.
+`app/core/auth.py` provides the reusable `CurrentUser` dependency. It extracts
+the access cookie, validates the JWT through `AuthService`, and returns the
+active `User`. The guard is opt-in per router or endpoint, so public endpoints
+remain public.
 
-Initial scope:
+Protect a future endpoint with:
 
-- move the duplicated route-local current-user dependency into `app/core/auth.py`;
-- provide `require_current_user` for protected routes and a consistent `401`;
-- keep `/api/auth/otp/request`, `/api/auth/otp/verify`, `/health`, and all
-  existing animal endpoints public;
-- document which future routes opt into authentication.
+```python
+from app.core.auth import CurrentUser
+from app.model.user import User
 
-It will not add RBAC, change animal endpoint access, or add token revocation.
+
+@router.get("/private")
+def get_private_data(user: CurrentUser) -> dict[str, str]:
+    return {"user_id": str(user.id)}
+```
+
+It returns `401` for a missing or invalid access cookie and `503` if auth is
+misconfigured. `/api/auth/otp/request`, `/api/auth/otp/verify`, `/health`, and
+all existing animal endpoints remain public. This guard does not add RBAC or
+token revocation.
