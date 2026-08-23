@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func
+from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,14 +24,9 @@ class User(Base):
     whatsapp_number: Mapped[str] = mapped_column(
         String(20), nullable=False, unique=True
     )
-    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    # === OTP FOR WHATSAPP ===
-    otp_code_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    otp_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    otp_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-
-    is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     last_login: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
