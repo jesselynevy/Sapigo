@@ -28,12 +28,21 @@ class AnimalService:
             raise AnimalNotFoundError(f"Animal '{animal_id}' not found")
         return animal
 
+    def get_owned_animal(self, animal_id: uuid.UUID, owner_id: uuid.UUID) -> Animal:
+        animal = self.get_animal(animal_id)
+        if animal.owner_id != owner_id:
+            raise AnimalNotFoundError(f"Animal '{animal_id}' not found for this owner")
+        return animal
+
     def list_animals(
         self,
         skip: int = 0,
         limit: int = 100,
         status: Optional[AnimalStatus] = None,
+        owner_id: Optional[uuid.UUID] = None,
     ) -> List[Animal]:
+        if owner_id is not None:
+            return self.repo.get_by_owner(owner_id, skip=skip, limit=limit)
         if status is not None:
             return self.repo.get_by_status(status, skip=skip, limit=limit)
         return self.repo.get_all(skip=skip, limit=limit)
