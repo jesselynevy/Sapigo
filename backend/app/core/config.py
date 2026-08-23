@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,6 +21,7 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_VERIFY_SERVICE_SID: str = ""
+    TWILIO_VERIFY_CHANNEL: Literal["sms", "whatsapp"] = "sms"
 
     AUTH_JWT_SECRET: str = ""
     AUTH_JWT_ALGORITHM: str = "HS256"
