@@ -1,5 +1,32 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Connect the frontend to SapiGo backend
+
+Set the backend URL in `.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+```
+
+Start the services in separate terminals:
+
+```bash
+# backend/
+uv run dev
+
+# frontend/
+npm run dev
+```
+
+The frontend calls these backend routes in order:
+
+1. `POST /api/animals` — create an animal (available as `createAnimal` in `src/lib/api/sapi.ts`).
+2. `POST /api/media-assets/upload` for each of three muzzle reference photos: middle, left, and right.
+3. `POST /api/animals/{animal_id}/enroll` to build the template.
+4. `POST /api/animals/{animal_id}/verify` with a live muzzle photo.
+
+The **Daftar Sapi** flow creates the animal, uploads middle, left, and right reference photos, and enrolls its muzzle template. Quality-gate rejection responses (`422`) identify the rejected angle and show the backend reason so the operator can retake it. The **Verification** flow submits the live photo through `/verify` and shows the decision plus similarity score.
+
 ## Getting Started
 
 First, run the development server:
