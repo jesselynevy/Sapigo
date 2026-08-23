@@ -15,14 +15,19 @@ export async function apiClient<T>(
   options?: RequestInit,
 ): Promise<T> {
   const url = `${API_URL}${endpoint}`;
-
   const headers = new Headers(options?.headers);
+
   // The browser must supply the boundary for multipart/form-data requests.
   if (options?.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(url, { ...options, headers });
+  const response = await fetch(url, {
+    ...options,
+    credentials: "include",
+    headers,
+  });
+
   if (!response.ok) {
     let detail: unknown = response.statusText;
     try {
@@ -32,6 +37,10 @@ export async function apiClient<T>(
       // Keep the HTTP status text when the response is not JSON.
     }
     throw new ApiError(response.status, detail);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;
