@@ -16,12 +16,12 @@ origin. Local HTTP development must use `AUTH_COOKIE_SECURE=false`.
 1. `POST /api/auth/otp/request` with `{"whatsapp_number":"+628123456789"}`.
 2. `POST /api/auth/otp/verify` with the number and WhatsApp code. On success,
    the response sets `sapigo_access` (HttpOnly) and `sapigo_csrf` (readable).
-3. Send browser requests with credentials enabled. For `POST /profile` and
+3. Send browser requests with credentials enabled. For `PATCH /profile` and
    `POST /logout`, copy the `sapigo_csrf` cookie into the `X-CSRF-Token` header
    and include the configured frontend `Origin` header.
 4. Fetch the signed-in user through `GET /api/auth/me`.
 
-`POST /api/auth/profile` accepts `{"full_name":"Ada Lovelace"}` and updates
+`PATCH /api/auth/profile` accepts `{"full_name":"Ada Lovelace"}` and updates
 the current user. Verification creates a user automatically if the phone number
 is new, so profile completion is optional in this simplified release.
 
