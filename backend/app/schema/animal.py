@@ -1,6 +1,5 @@
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,23 +7,26 @@ from app.model.enums import AnimalStatus
 
 
 class AnimalBase(BaseModel):
+    owner_id: uuid.UUID
     display_name: str = Field(..., max_length=255)
-    breed: Optional[str] = Field(None, max_length=100)
-    sex: Optional[str] = Field(None, max_length=10)
+    breed: str | None = Field(None, max_length=100)
+    sex: str | None = Field(None, max_length=10)
+    weight: float | None = Field(None, ge=0, description="Animal weight in kilograms")
     status: AnimalStatus = AnimalStatus.ACTIVE
-    dataset_source: Optional[str] = Field(None, max_length=50)
-    dataset_identity: Optional[str] = Field(None, max_length=50)
+    dataset_source: str | None = Field(None, max_length=50)
+    dataset_identity: str | None = Field(None, max_length=50)
 
 
 class AnimalUpdate(BaseModel):
     """All fields optional — only supplied fields are patched."""
 
-    display_name: Optional[str] = Field(None, max_length=255)
-    breed: Optional[str] = Field(None, max_length=100)
-    sex: Optional[str] = Field(None, max_length=10)
-    status: Optional[AnimalStatus] = None
-    dataset_source: Optional[str] = Field(None, max_length=50)
-    dataset_identity: Optional[str] = Field(None, max_length=50)
+    display_name: str | None = Field(None, max_length=255)
+    breed: str | None = Field(None, max_length=100)
+    sex: str | None = Field(None, max_length=10)
+    weight: float | None = Field(None, ge=0, description="Animal weight in kilograms")
+    status: AnimalStatus | None = None
+    dataset_source: str | None = Field(None, max_length=50)
+    dataset_identity: str | None = Field(None, max_length=50)
 
 
 class AnimalRead(AnimalBase):
@@ -32,3 +34,9 @@ class AnimalRead(AnimalBase):
 
     id: uuid.UUID
     created_at: datetime
+
+
+class VerificationLinkRead(BaseModel):
+    animal_id: uuid.UUID
+    owner_id: uuid.UUID
+    url: str
