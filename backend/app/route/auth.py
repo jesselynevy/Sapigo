@@ -105,7 +105,7 @@ def verify_otp(
     return AuthenticatedUserRead.model_validate(authenticated_user.user)
 
 
-@router.post("/profile", response_model=AuthenticatedUserRead)
+@router.patch("/profile", response_model=AuthenticatedUserRead)
 def update_profile(
     payload: ProfileUpdateRequest,
     _: CsrfValidated,
