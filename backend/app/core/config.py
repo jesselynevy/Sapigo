@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     DATABASE_SOURCE: str = "local"
     DATABASE_URL: str = ""
 
+    APP_ENV: str = "production"
+
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_VERIFY_SERVICE_SID: str = ""
@@ -23,6 +25,9 @@ class Settings(BaseSettings):
     AUTH_ACCESS_TOKEN_MINUTES: int = 1440
     AUTH_COOKIE_SECURE: bool = True
     AUTH_FRONTEND_ORIGIN: str = ""
+    AUTH_OTP_PROVIDER: str = "twilio"
+    AUTH_STUB_WHATSAPP_NUMBER: str = ""
+    AUTH_STUB_OTP_CODE: str = ""
 
     @model_validator(mode="after")
     def build_database_url(self):
