@@ -22,9 +22,11 @@ export interface SapiFilter {
 
 export interface CowData {
   cowCode: string;
+  ownerId: string;
   display_name: string;
   breed: string;
   sex: string;
+  weight: number | null;
   status: string;
   verification: "verified" | "unverified";
 }
