@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY:str = ""
     CLOUDINARY_API_SECRET:str = ""
+    FRONTEND_BASE_URL: str = "http://localhost:3000"
 
     @model_validator(mode="after")
     def build_database_url(self):
