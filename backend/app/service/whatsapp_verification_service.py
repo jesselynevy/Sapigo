@@ -1,4 +1,6 @@
+import hmac
 from dataclasses import dataclass
+from typing import Protocol
 
 import httpx
 
@@ -16,6 +18,12 @@ class VerificationProviderConfigurationError(VerificationProviderError):
 @dataclass(frozen=True)
 class VerificationResult:
     status: str
+
+
+class VerificationProvider(Protocol):
+    def start_verification(self, whatsapp_number: str) -> VerificationResult: ...
+
+    def check_verification(self, whatsapp_number: str, code: str) -> VerificationResult: ...
 
 
 class TwilioVerifyService:
@@ -69,3 +77,42 @@ class TwilioVerifyService:
             "VerificationCheck",
             {"To": whatsapp_number, "Code": code},
         )
+
+
+class DevelopmentStubVerificationService:
+    """Development-only provider for one configured demo phone number and code."""
+
+    def _configuration(self) -> tuple[str, str]:
+        if settings.APP_ENV != "development":
+            raise VerificationProviderConfigurationError(
+                "The stub verification provider is only available in development"
+            )
+        if not (
+            settings.AUTH_STUB_WHATSAPP_NUMBER and settings.AUTH_STUB_OTP_CODE
+        ):
+            raise VerificationProviderConfigurationError(
+                "The stub verification provider is not configured"
+            )
+        return settings.AUTH_STUB_WHATSAPP_NUMBER, settings.AUTH_STUB_OTP_CODE
+
+    def start_verification(self, whatsapp_number: str) -> VerificationResult:
+        self._configuration()
+        return VerificationResult(status="pending")
+
+    def check_verification(
+        self, whatsapp_number: str, code: str
+    ) -> VerificationResult:
+        configured_number, configured_code = self._configuration()
+        if hmac.compare_digest(whatsapp_number, configured_number) and hmac.compare_digest(
+            code, configured_code
+        ):
+            return VerificationResult(status="approved")
+        return VerificationResult(status="denied")
+
+
+def get_verification_provider() -> VerificationProvider:
+    if settings.AUTH_OTP_PROVIDER == "twilio":
+        return TwilioVerifyService()
+    if settings.AUTH_OTP_PROVIDER == "stub":
+        return DevelopmentStubVerificationService()
+    raise VerificationProviderConfigurationError("Unknown OTP provider")

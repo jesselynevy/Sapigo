@@ -10,9 +10,10 @@ from app.core.config import settings
 from app.model.user import User
 from app.repository.user_repo import UserRepository
 from app.service.whatsapp_verification_service import (
-    TwilioVerifyService,
+    VerificationProvider,
     VerificationProviderConfigurationError,
     VerificationProviderError,
+    get_verification_provider,
 )
 
 
@@ -43,9 +44,9 @@ class AuthenticatedUser:
 
 
 class AuthService:
-    def __init__(self, db: Session, provider: TwilioVerifyService | None = None):
+    def __init__(self, db: Session, provider: VerificationProvider | None = None):
         self.users = UserRepository(db)
-        self.provider = provider or TwilioVerifyService()
+        self.provider = provider or get_verification_provider()
 
     @staticmethod
     def _now() -> datetime:
