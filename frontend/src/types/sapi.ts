@@ -23,6 +23,7 @@ export interface SapiFilter {
 export interface CowData {
   cowCode: string;
   ownerId: string;
+  ownerName: string | null;
   display_name: string;
   breed: string;
   sex: string;
@@ -30,5 +31,5 @@ export interface CowData {
   status: string;
   createdAt: string;
   transferredAt: string | null;
-  verification: "verified" | "unverified";
+  verification: "verified" | "mismatch" | "pending";
 }

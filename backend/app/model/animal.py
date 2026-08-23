@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
-from app.model.enums import AnimalStatus
+from app.model.enums import AnimalStatus, VerificationDecision
 
 if TYPE_CHECKING:
     from app.model.media_asset import MediaAsset
@@ -54,6 +54,17 @@ class Animal(Base):
     verifications: Mapped[list["Verification"]] = relationship(back_populates="animal")
     media_assets: Mapped[list["MediaAsset"]] = relationship(back_populates="animal")
     owner: Mapped["User"] = relationship(back_populates="animals")
+
+    @property
+    def latest_verification_decision(self) -> VerificationDecision | None:
+        """Return the most recent persisted verification decision for this cow."""
+        if not self.verifications:
+            return None
+        return max(self.verifications, key=lambda verification: verification.created_at).decision
+
+    @property
+    def owner_full_name(self) -> str | None:
+        return self.owner.full_name if self.owner else None
 
     def __repr__(self) -> str:
         return f"<Animal id={self.id} name={self.display_name!r} status={self.status}>"

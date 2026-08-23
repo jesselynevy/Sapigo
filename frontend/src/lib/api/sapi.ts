@@ -5,6 +5,7 @@ import { CowData } from "@/src/types/sapi";
 interface AnimalApiResponse {
   id: string;
   owner_id: string;
+  owner_full_name: string | null;
   display_name: string;
   breed: string | null;
   sex: string | null;
@@ -12,6 +13,7 @@ interface AnimalApiResponse {
   status: string;
   created_at: string;
   transferred_at: string | null;
+  latest_verification_decision: "verified" | "mismatch" | "manual_review" | null;
 }
 
 export interface MediaAssetApiResponse {
@@ -64,6 +66,7 @@ function mapToCowData(data: AnimalApiResponse): CowData {
   return {
     cowCode: data.id,
     ownerId: data.owner_id,
+    ownerName: data.owner_full_name,
     display_name: data.display_name,
     breed: data.breed ?? "",
     sex: data.sex ?? "",
@@ -71,7 +74,7 @@ function mapToCowData(data: AnimalApiResponse): CowData {
     status: data.status,
     createdAt: data.created_at,
     transferredAt: data.transferred_at,
-    verification: "unverified",
+    verification: data.latest_verification_decision === "verified" ? "verified" : data.latest_verification_decision === "mismatch" ? "mismatch" : "pending",
   };
 }
 

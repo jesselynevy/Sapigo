@@ -31,6 +31,7 @@ export default function VerificationStepPage() {
 
   const [loading, setLoading] = useState(false);
   const [verification, setVerification] = useState<VerificationApiResponse | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -53,31 +54,31 @@ export default function VerificationStepPage() {
   }, [cowData, cowId, hydrated, ownerId, setCowData]);
 
   useEffect(() => {
-    if (step === 4 && muzzlePhoto && !verification) {
-      setLoading(true);
-      setError(null);
-      (async () => {
-        try {
-          if (!ownerId) {
-            throw new Error("This verification link is missing its owner identity. Scan the QR code again.");
-          }
-          setVerification(await verifyAnimal(cowId, muzzlePhoto, ownerId));
-        } catch (err) {
-          if (err instanceof ApiError && err.status === 422) {
-            const detail = err.detail as { reasons?: string[] };
-            setError(`Photo rejected: ${detail.reasons?.join(", ") ?? "please retake it with better lighting and focus."}`);
-          } else if (err instanceof ApiError && err.status === 400) {
-            setError("This cow has no enrolled muzzle template yet. Enroll 2–3 reference photos first.");
-          } else {
-            setError(err instanceof Error ? err.message : "Verification failed. Please try again.");
-          }
-        } finally {
-          setLoading(false);
+    if (step !== 4 || !muzzlePhoto || verification || submitted || loading) return;
+
+    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+    (async () => {
+      try {
+        if (!ownerId) {
+          throw new Error("This verification is missing the selected cow owner. Choose the cow again.");
         }
-      })();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+        setVerification(await verifyAnimal(cowId, muzzlePhoto, ownerId));
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 422) {
+          const detail = err.detail as { reasons?: string[] };
+          setError(`Photo rejected: ${detail.reasons?.join(", ") ?? "please retake it with better lighting and focus."}`);
+        } else if (err instanceof ApiError && err.status === 400) {
+          setError("This cow has no enrolled muzzle template yet. Enroll 2–3 reference photos first.");
+        } else {
+          setError(err instanceof Error ? err.message : "Verification failed. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [cowId, loading, muzzlePhoto, ownerId, step, submitted, verification]);
 
   const goToStep = (s: number) => router.push(`/verification/${cowId}/${s}${ownerId ? `?owner_id=${encodeURIComponent(ownerId)}` : ""}`);
 
@@ -97,6 +98,13 @@ export default function VerificationStepPage() {
       return;
     }
     goToStep(step + 1);
+  };
+
+  const handleRetake = () => {
+    setError(null);
+    setVerification(null);
+    setSubmitted(false);
+    goToStep(3);
   };
 
   const handleFinish = () => {
@@ -122,8 +130,8 @@ export default function VerificationStepPage() {
       primaryDisabled={!canProceed() || loading || (step === 4 && !!error)}
       onPrimaryClick={handleNext}
       showSecondaryButton={step !== 3}
-      secondaryLabel={step === TOTAL_STEPS ? "Selesai" : "Kembali"}
-      onSecondaryClick={step === TOTAL_STEPS ? handleFinish : handleBack}
+      secondaryLabel={step === TOTAL_STEPS ? (error || !muzzlePhoto ? "Retake photo" : "Selesai") : "Kembali"}
+      onSecondaryClick={step === TOTAL_STEPS ? (error || !muzzlePhoto ? handleRetake : handleFinish) : handleBack}
     >
       {step === 3 && (
         <>
@@ -137,7 +145,12 @@ export default function VerificationStepPage() {
           </div>
           <PhotoInput
             value={muzzlePhoto}
-            onChange={setMuzzlePhoto}
+            onChange={(file) => {
+              setError(null);
+              setVerification(null);
+              setSubmitted(false);
+              setMuzzlePhoto(file);
+            }}
             placeholder="Foto muzzle sapi"
           />
           {error && <p className="text-red-400 text-xl">{error}</p>}
@@ -150,22 +163,22 @@ export default function VerificationStepPage() {
             <div className="flex items-center justify-center min-h-75">
               <span className="text-gray-400">Loading...</span>
             </div>
-          ) : verification && cowData ? (
+          ) : verification ? (
             <>
               <CheckCircle2
                 className={`w-16 h-16 ${verification.decision === "verified" ? "text-green-700" : "text-amber-600"}`}
               />
               <p className="text-center font-bold text-black px-8">
                 {verification.decision === "verified"
-                  ? `Cow ${cowData.cowCode}'s identity is verified!`
-                  : `Cow ${cowData.cowCode}'s identity needs review.`}
+                  ? `Cow ${cowData?.cowCode ?? cowId}'s identity is verified!`
+                  : `Cow ${cowData?.cowCode ?? cowId}'s identity does not match.`}
               </p>
               <p className="text-center text-sm text-gray-500 px-8">
                 Similarity score: {verification.similarity_score.toFixed(3)}
               </p>
             </>
           ) : (
-            <p className="text-center font-bold text-black px-8">{error ?? "Verification result is unavailable."}</p>
+            <p className="text-center font-bold text-black px-8">{error ?? "No muzzle photo is available. Go back and take or upload one."}</p>
           )}
         </div>
       )}

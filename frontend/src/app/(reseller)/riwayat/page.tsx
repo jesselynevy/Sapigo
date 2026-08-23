@@ -3,26 +3,25 @@
 import PageHeader from "@/src/components/ui/PageHeader";
 import { useEffect, useState } from "react";
 import { listAnimals } from "@/src/lib/api/sapi";
-import { useAuthStore } from "@/src/store/useAuthStore";
+import { useCurrentUser } from "@/src/lib/hooks/useCurrentUser";
 import { CowData } from "@/src/types/sapi";
+import { getCowActivities } from "@/src/lib/utils/cowActivity";
 
 export default function RiwayatTransferSapiPage() {
-  const user = useAuthStore((state) => state.user);
+  const { user, loading: loadingUser } = useCurrentUser();
   const [cows, setCows] = useState<CowData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (loadingUser) return;
     if (!user?.id) {
       setLoading(false);
       return;
     }
     listAnimals(user.id, true).then(setCows).finally(() => setLoading(false));
-  }, [user?.id]);
+  }, [loadingUser, user?.id]);
 
-  const history = cows.flatMap((cow) => [
-    { id: `${cow.cowCode}-in`, type: "Cow in", date: cow.createdAt, cow },
-    ...(cow.transferredAt ? [{ id: `${cow.cowCode}-out`, type: "Cow out", date: cow.transferredAt, cow }] : []),
-  ]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const history = getCowActivities(cows);
 
   return (
     <div className="min-h-screen flex flex-col bg-primary">

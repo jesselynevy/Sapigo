@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.model.enums import AnimalStatus
+from app.model.enums import AnimalStatus, VerificationDecision
 
 
 class AnimalBase(BaseModel):
@@ -36,3 +36,5 @@ class AnimalRead(AnimalBase):
     owner_id: uuid.UUID | None
     created_at: datetime
     transferred_at: datetime | None
+    latest_verification_decision: VerificationDecision | None
+    owner_full_name: str | None

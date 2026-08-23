@@ -9,7 +9,7 @@ export interface QuickActionProps {
   onClick?: () => void;
 }
 
-export type CowStatus = "verified" | "unverified";
+export type CowStatus = "verified" | "mismatch" | "pending";
 
 export interface CowCardProps {
   name: string;

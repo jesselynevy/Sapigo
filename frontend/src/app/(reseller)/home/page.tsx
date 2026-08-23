@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { ArrowLeftRight, History, LogOut, Plus, Scan } from "lucide-react";
 
 import CowCard from "@/src/components/home/CowCard";
+import ActivityCard from "@/src/components/home/ActivityCard";
 import QuickAction from "@/src/components/home/QuickAction";
 import SectionHeader from "@/src/components/home/SectionHeader";
 import StatCard from "@/src/components/home/StatCard";
 import { getCurrentUser, logout } from "@/src/lib/api/auth";
 import { listAnimals } from "@/src/lib/api/sapi";
 import { CowData } from "@/src/types/sapi";
+import { getCowActivities } from "@/src/lib/utils/cowActivity";
 
 function getInitials(fullName: string): string {
   return fullName
@@ -35,7 +37,7 @@ export default function HomePage() {
       try {
         const user = await getCurrentUser();
         setFullName(user.full_name);
-        const animals = await listAnimals(user.id);
+        const animals = await listAnimals(user.id, true);
         setCows(animals);
       } catch {
         setCows([]);
@@ -62,6 +64,21 @@ export default function HomePage() {
       setLoggingOut(false);
     }
   };
+
+  const activeCows = cows
+    .filter((cow) => !cow.transferredAt)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const recentActivities = getCowActivities(cows).slice(0, 3);
+  const now = new Date();
+  const soldThisMonth = cows.filter((cow) => {
+    if (!cow.transferredAt) return false;
+    const transferredAt = new Date(cow.transferredAt);
+    return transferredAt.getFullYear() === now.getFullYear()
+      && transferredAt.getMonth() === now.getMonth();
+  }).length;
+  const pendingVerification = activeCows.filter(
+    (cow) => cow.verification === "pending",
+  ).length;
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-primary">
@@ -112,9 +129,9 @@ export default function HomePage() {
         {logoutError && <p className="text-sm text-red-200">{logoutError}</p>}
 
         <div className="flex gap-3">
-          <StatCard value={loadingCows ? "—" : cows.length} label="Registered Cows" />
-          <StatCard value="—" label="Sold This Month" />
-          <StatCard value="—" label="Pending Verification" />
+          <StatCard value={loadingCows ? "—" : activeCows.length} label="Registered Cows" />
+          <StatCard value={loadingCows ? "—" : soldThisMonth} label="Sold This Month" />
+          <StatCard value={loadingCows ? "—" : pendingVerification} label="Pending Verification" />
         </div>
       </div>
 
@@ -149,15 +166,15 @@ export default function HomePage() {
           />
           {loadingCows ? (
             <p className="text-sm text-gray-400">Loading cows...</p>
-          ) : cows.length === 0 ? (
+          ) : activeCows.length === 0 ? (
             <p className="text-sm text-gray-400">No cows registered yet.</p>
           ) : (
-            cows.slice(0, 2).map((cow) => (
+            activeCows.slice(0, 2).map((cow) => (
               <CowCard
                 key={cow.cowCode}
                 name={cow.display_name}
                 subtitle={`ID: ${cow.cowCode}`}
-                status="unverified"
+                status={cow.verification}
               />
             ))
           )}
@@ -166,11 +183,21 @@ export default function HomePage() {
         <div className="flex flex-col gap-2">
           <SectionHeader
             title="Recent Activity"
-            onSeeAll={() => router.push("/aktivitas")}
+            onSeeAll={() => router.push("/riwayat")}
           />
-          <p className="text-sm text-gray-400">
-            Activity history is not available from the backend yet.
-          </p>
+          {loadingCows ? (
+            <p className="text-sm text-gray-400">Loading activity...</p>
+          ) : recentActivities.length === 0 ? (
+            <p className="text-sm text-gray-400">No activity yet.</p>
+          ) : (
+            recentActivities.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                title={`${activity.type}: ${activity.cow.display_name}`}
+                subtitle={`${new Date(activity.date).toLocaleDateString()} · ID: ${activity.cow.cowCode}`}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

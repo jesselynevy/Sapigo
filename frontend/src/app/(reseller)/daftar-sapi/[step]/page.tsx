@@ -9,7 +9,7 @@ import InfoRow from "@/src/components/ui/InfoRow";
 import { ApiError } from "@/src/lib/api/client";
 import { createAnimal, enrollAnimalFromPhotos, ReferencePhotoUploadError } from "@/src/lib/api/sapi";
 import { useSapiFlowState } from "@/src/lib/hooks/useSapiFlowState";
-import { useAuthStore } from "@/src/store/useAuthStore";
+import { useCurrentUser } from "@/src/lib/hooks/useCurrentUser";
 
 const TOTAL_STEPS = 4;
 
@@ -34,7 +34,7 @@ export default function DaftarSapiStepPage() {
   const [loading, setLoading] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const user = useAuthStore((state) => state.user);
+  const { user, loading: loadingUser } = useCurrentUser();
   const { muzzlePhoto, setMuzzlePhoto, cowData, setCowData, clearAll, hydrated } = useSapiFlowState();
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function DaftarSapiStepPage() {
       onBack={handleBack}
       showPrimaryButton={step < TOTAL_STEPS}
       primaryLabel={step === 1 ? "Create animal" : step === 3 ? "Upload & enroll" : "Continue"}
-      primaryDisabled={loading || (step === 1 && (!displayName.trim() || !user?.id)) || (step === 3 && (!muzzlePhoto || !leftReferencePhoto || !rightReferencePhoto))}
+      primaryDisabled={loading || loadingUser || (step === 1 && (!displayName.trim() || !user?.id)) || (step === 3 && (!muzzlePhoto || !leftReferencePhoto || !rightReferencePhoto))}
       onPrimaryClick={handlePrimary}
       showSecondaryButton={step > 1}
       secondaryLabel={step === TOTAL_STEPS ? "Finish" : "Back"}
@@ -125,7 +125,7 @@ export default function DaftarSapiStepPage() {
             <h2 className="font-jakarta font-bold text-black text-center">Create animal</h2>
             <p className="font-jakarta text-gray-500 text-center">These details are saved to the backend before photos are collected.</p>
           </div>
-          {!user?.id && <p className="text-sm text-amber-700">Sign in as a reseller to save this cow under your ownership.</p>}
+          {!loadingUser && !user?.id && <p className="text-sm text-amber-700">Sign in as a reseller to save this cow under your ownership.</p>}
           <label className="flex flex-col gap-1 text-sm text-gray-700">Name<input className="rounded-lg border border-[#D6DCE8] px-3 py-2" value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="Example: Bessie" /></label>
           <label className="flex flex-col gap-1 text-sm text-gray-700">Breed<input className="rounded-lg border border-[#D6DCE8] px-3 py-2" value={breed} onChange={(event) => setBreed(event.target.value)} placeholder="Example: Brahman" /></label>
           <label className="flex flex-col gap-1 text-sm text-gray-700">Sex<select className="rounded-lg border border-[#D6DCE8] px-3 py-2" value={sex} onChange={(event) => setSex(event.target.value)}><option value="">Select Female or Male</option><option value="F">Female (F)</option><option value="M">Male (M)</option></select></label>

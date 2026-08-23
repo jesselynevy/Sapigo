@@ -10,7 +10,7 @@ import StepFlowLayout from "@/src/components/ui/StepFlowLayout";
 import { ApiError } from "@/src/lib/api/client";
 import { listAnimals, TransferApiResponse, transferAnimal } from "@/src/lib/api/sapi";
 import { useTransferSapiState } from "@/src/lib/hooks/useTransferSapiState";
-import { useAuthStore } from "@/src/store/useAuthStore";
+import { useCurrentUser } from "@/src/lib/hooks/useCurrentUser";
 import { CowData } from "@/src/types/sapi";
 
 const TOTAL_STEPS = 4;
@@ -27,7 +27,7 @@ export default function TransferSapiStepPage() {
   const router = useRouter();
   const { step: rawStep } = useParams<{ step: string }>();
   const step = Number(rawStep);
-  const user = useAuthStore((state) => state.user);
+  const { user, loading: loadingUser } = useCurrentUser();
   const [cows, setCows] = useState<CowData[]>([]);
   const [loadingCows, setLoadingCows] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -41,12 +41,13 @@ export default function TransferSapiStepPage() {
   }, [hydrated, router, step]);
 
   useEffect(() => {
+    if (loadingUser) return;
     if (!user?.id) {
       setLoadingCows(false);
       return;
     }
     listAnimals(user.id).then(setCows).catch(() => setError("Could not load your cows.")).finally(() => setLoadingCows(false));
-  }, [user?.id]);
+  }, [loadingUser, user?.id]);
 
   useEffect(() => {
     if (step !== 4 || !selectedCow || !identityPhoto || !user?.id || result || loading || attempted) return;

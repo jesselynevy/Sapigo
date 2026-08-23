@@ -9,8 +9,9 @@ interface CowDetail {
   ownership: string;
   weight: number | null;
   breed: string;
-  verification: "verified" | "unverified";
-  receivedInfo: string;
+  sex: string;
+  verification: "verified" | "mismatch" | "pending";
+  registeredAt: string;
 }
 
 interface CowDetailModalProps {
@@ -36,11 +37,12 @@ export default function CowDetailModal({
         <InfoRow label="Ownership" value={cow.ownership} />
         <InfoRow label="Weight" value={cow.weight === null ? "Not available" : `${cow.weight} kg`} />
         <InfoRow label="Breed" value={cow.breed} />
+        <InfoRow label="Sex" value={cow.sex} />
         <InfoRow
           label="Verification"
           value={<StatusBadge status={cow.verification} />}
         />
-        <InfoRow label="Reception Info" value={cow.receivedInfo} />
+        <InfoRow label="Registered at" value={new Date(cow.registeredAt).toLocaleString()} />
       </div>
     </Modal>
   );

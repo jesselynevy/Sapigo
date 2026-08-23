@@ -5,17 +5,18 @@ import { useRouter } from "next/navigation";
 
 import PageHeader from "@/src/components/ui/PageHeader";
 import { listAnimals } from "@/src/lib/api/sapi";
-import { useAuthStore } from "@/src/store/useAuthStore";
+import { useCurrentUser } from "@/src/lib/hooks/useCurrentUser";
 import { CowData } from "@/src/types/sapi";
 
 export default function SelectCowForVerificationPage() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+  const { user, loading: loadingUser } = useCurrentUser();
   const [cows, setCows] = useState<CowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (loadingUser) return;
     if (!user?.id) {
       setError("Sign in as a reseller to verify one of your cows.");
       setLoading(false);
@@ -25,7 +26,7 @@ export default function SelectCowForVerificationPage() {
       .then(setCows)
       .catch(() => setError("Could not load your cows."))
       .finally(() => setLoading(false));
-  }, [user?.id]);
+  }, [loadingUser, user?.id]);
 
   return (
     <div className="min-h-screen flex flex-col bg-primary">
