@@ -29,17 +29,23 @@ def list_animals(
     skip: int = 0,
     limit: int = 100,
     status_filter: Optional[AnimalStatus] = Query(None, alias="status"),
+    owner_id: Optional[uuid.UUID] = Query(None),
     service: AnimalService = Depends(get_animal_service),
 ) -> List[AnimalRead]:
-    return service.list_animals(skip=skip, limit=limit, status=status_filter)
+    return service.list_animals(
+        skip=skip, limit=limit, status=status_filter, owner_id=owner_id
+    )
 
 
 @router.get("/{animal_id}", response_model=AnimalRead)
 def get_animal(
     animal_id: uuid.UUID,
+    owner_id: Optional[uuid.UUID] = Query(None),
     service: AnimalService = Depends(get_animal_service),
 ) -> AnimalRead:
     try:
+        if owner_id is not None:
+            return service.get_owned_animal(animal_id, owner_id)
         return service.get_animal(animal_id)
     except AnimalNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
