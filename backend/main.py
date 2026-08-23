@@ -12,10 +12,9 @@ if settings.AUTH_FRONTEND_ORIGIN:
         CORSMiddleware,
         allow_origins=[settings.AUTH_FRONTEND_ORIGIN],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
         allow_headers=["Content-Type", "X-CSRF-Token"],
     )
-
 
 for router in routers:
     app.include_router(router, prefix="/api")

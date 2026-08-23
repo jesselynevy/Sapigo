@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.19.1",
+    "cloudinary>=1.46.0",
     "email-validator>=2.3.0",
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
@@ -16,6 +17,7 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "pyjwt>=2.13.0",
     "python-multipart>=0.0.32",
+    "qrcode[pil]>=8.2",
     "sqlalchemy>=2.0.52",
     "torch>=2.13.0",
     "torchvision>=0.28.0",
@@ -24,7 +26,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-training = ["mlflow", "optuna", "ipykernel"]
+training = ["mlflow", "optuna", "ipykernel", "dagshub"]
 
 [project.scripts]
 dev = "main:dev"

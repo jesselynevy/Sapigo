@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     AUTH_STUB_WHATSAPP_NUMBER: str = ""
     AUTH_STUB_OTP_CODE: str = ""
 
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+
     @model_validator(mode="after")
     def build_database_url(self):
         if not self.DATABASE_URL:
