@@ -7,7 +7,7 @@ import StatusBadge from "@/src/components/ui/StatusBadge";
 interface CowDetail {
   cowCode: string;
   ownership: string;
-  weight: number;
+  weight: number | null;
   breed: string;
   verification: "verified" | "unverified";
   receivedInfo: string;
@@ -34,7 +34,7 @@ export default function CowDetailModal({
       <div className="flex flex-col gap-1 divide-y divide-[#EEF1F6]">
         <InfoRow label="Cow Code" value={cow.cowCode} />
         <InfoRow label="Ownership" value={cow.ownership} />
-        <InfoRow label="Weight" value={`${cow.weight} kg`} />
+        <InfoRow label="Weight" value={cow.weight === null ? "Not available" : `${cow.weight} kg`} />
         <InfoRow label="Breed" value={cow.breed} />
         <InfoRow
           label="Verification"
