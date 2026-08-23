@@ -62,12 +62,12 @@ Multipart form:
 | `uploaded_by_user_id` | *(optional for now)* |
 
 - Each photo passes the quality gate (blur/exposure) before it's stored.
-- **422** = rejected, retake photo — check `reasons` in the response.
+- **422** = rejected, retake photo, check `reasons` in the response.
 - **201** = accepted, response includes `id` (this is a `media_asset_id`).
 
 Repeat 2–3 times with genuinely different angles/lighting. Collect all returned `media_asset_id`s.
 
-### 3. Enroll — build the muzzle template
+### 3. Enroll (build the muzzle template)
 
 ```
 POST /animals/{animal_id}/enroll
@@ -99,7 +99,7 @@ Multipart form:
 - **400** = animal has no enrolled template yet (do step 3 first).
 - **201** = returns `VerificationRead`:
   - `similarity_score` — cosine similarity, 0–1
-  - `decision` — `MATCH` or `NO_MATCH` (threshold currently `0.7852`, from `final_threshold_at_far_1pct`)
+  - `decision` — `MATCH` or `NO_MATCH` (threshold currently `0.62`, from `final_threshold_at_far_1pct`)
 
 ### Flow summary
 
