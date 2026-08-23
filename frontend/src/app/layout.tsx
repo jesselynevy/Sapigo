@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import IndonesianTranslationProvider from "@/src/components/i18n/IndonesianTranslationProvider";
+import { locale } from "@/src/i18n/id";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,19 +20,19 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Sapigo",
-  description: "",
+  title: "SapiGo",
+  description: "Platform manajemen sapi",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang={locale.split("-")[0]}
       className={`${geistSans.variable} ${geistMono.variable} ${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-screen ">
         <div className="mx-auto max-w-md min-h-screen shadow-lg bg-primary relative">
-          {children}
+          <IndonesianTranslationProvider>{children}</IndonesianTranslationProvider>
         </div>
       </body>
     </html>

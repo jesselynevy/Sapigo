@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftRight, History, LogOut, Plus, Scan } from "lucide-react";
+import { ArrowLeftRight, History, Languages, LogOut, Plus, Scan } from "lucide-react";
 
 import CowCard from "@/src/components/home/CowCard";
 import ActivityCard from "@/src/components/home/ActivityCard";
@@ -13,6 +13,7 @@ import { getCurrentUser, logout } from "@/src/lib/api/auth";
 import { listAnimals } from "@/src/lib/api/sapi";
 import { CowData } from "@/src/types/sapi";
 import { getCowActivities } from "@/src/lib/utils/cowActivity";
+import { AppLocale, getAppLocale, setAppLocale } from "@/src/i18n/id";
 
 function getInitials(fullName: string): string {
   return fullName
@@ -31,6 +32,11 @@ export default function HomePage() {
   const [loadingCows, setLoadingCows] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [activeLocale, setActiveLocale] = useState<AppLocale>("id");
+
+  useEffect(() => {
+    setActiveLocale(getAppLocale());
+  }, []);
 
   useEffect(() => {
     const loadUserAndAnimals = async () => {
@@ -63,6 +69,11 @@ export default function HomePage() {
       );
       setLoggingOut(false);
     }
+  };
+
+  const toggleLanguage = () => {
+    setAppLocale(activeLocale === "id" ? "en" : "id");
+    window.location.reload();
   };
 
   const activeCows = cows
@@ -114,6 +125,15 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              aria-label={activeLocale === "id" ? "Ubah bahasa ke Inggris" : "Switch language to Indonesian"}
+              title={activeLocale === "id" ? "Ubah ke English" : "Ganti ke Bahasa Indonesia"}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/50 text-white transition-transform duration-150 ease-out active:scale-95"
+            >
+              <Languages className="h-4 w-4" aria-hidden="true" />
+            </button>
             <button
               type="button"
               onClick={() => void handleLogout()}
