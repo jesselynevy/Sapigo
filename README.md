@@ -178,8 +178,7 @@ Muzzle biometrics are promising, but SapiGo does not make an accuracy claim with
 
 - Li, G., Erickson, G. E., & Xiong, Y. (2022). *Individual beef cattle identification using muzzle images and deep learning techniques.* [Animals](https://doi.org/10.3390/ani12111453).
 - Lee, T., Na, Y., Kim, B. G., Lee, S., & Choi, Y. (2023). *Identification of individual Hanwoo cattle by muzzle pattern images through deep learning.* [Animals](https://doi.org/10.3390/ani13182856).
-- See [the MVP proposal](./docs/sapigo-mvp-proposal.md) for project scope, safeguards, and evaluation details.
-
+  
 ---
 
 **Built for safer, more accountable cattle handovers.**
